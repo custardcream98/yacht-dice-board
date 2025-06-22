@@ -7,7 +7,7 @@ import { ScoreCategory } from '@/types/game'
 import { Dice6, ArrowLeft } from 'lucide-react'
 
 // 분리된 컴포넌트들 import
-import { GameHeader, GameStatus, WaitingRoom, ScoreInput, PlayerScoreSummary, GameFinished } from '@/components/game'
+import { GameHeader, WaitingRoom, ScoreInput, PlayerScoreSummary, GameFinished } from '@/components/game'
 import { useGamePlay, useGameRoomActions, useGameRoomData } from '@/hooks'
 
 export default function GameRoomPage() {
@@ -113,7 +113,13 @@ export default function GameRoomPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* 헤더 */}
-      <GameHeader gameRoom={gameRoom} myPlayer={myPlayer} onDeleteRoom={handleDeleteRoom} />
+      <GameHeader
+        gameRoom={gameRoom}
+        myPlayer={myPlayer}
+        currentPlayer={currentPlayer}
+        isMyTurn={!!isMyTurn}
+        onDeleteRoom={handleDeleteRoom}
+      />
 
       <div className="p-4 space-y-4">
         {/* 게임 시작 전 대기실 */}
@@ -122,9 +128,6 @@ export default function GameRoomPage() {
         {/* 게임 진행 중 */}
         {gameRoom.status === 'playing' && (
           <>
-            {/* 현재 상황 */}
-            <GameStatus gameRoom={gameRoom} currentPlayer={currentPlayer!} isMyTurn={!!isMyTurn} />
-
             {/* 점수 입력 */}
             <ScoreInput myPlayer={myPlayer} isMyTurn={!!isMyTurn} onScoreSubmit={handleScoreSubmit} />
 

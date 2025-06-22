@@ -1,6 +1,5 @@
 export { LinkShareButton } from './LinkShareButton'
 export { GameHeader } from './GameHeader'
-export { GameStatus } from './GameStatus'
 export { WaitingRoom } from './WaitingRoom'
 export { ScoreInput } from './ScoreInput'
 export { PlayerScoreSummary } from './PlayerScoreSummary'
