@@ -9,16 +9,16 @@ import {
 
 // 주사위 점수 계산 함수들
 export class YachtDiceCalculator {
-  // 상위 섹션 점수 계산 (1-6)
+  // 상위 섹션 점수 계산
   static calculateUpperSection(dice: number[], target: number): number {
     return dice.filter(die => die === target).reduce((sum, die) => sum + die, 0)
   }
 
-  // Four of a Kind 계산
-  static calculateFourOfAKind(dice: number[]): number {
+  // Poker 계산
+  static calculatePoker(dice: number[]): number {
     const counts = this.getDiceCounts(dice)
-    const hasFourOfAKind = Object.values(counts).some(count => count >= 4)
-    return hasFourOfAKind ? dice.reduce((sum, die) => sum + die, 0) : 0
+    const poker = Object.values(counts).some(count => count >= 4)
+    return poker ? dice.reduce((sum, die) => sum + die, 0) : 0
   }
 
   // Full House 계산
@@ -71,7 +71,7 @@ export class YachtDiceCalculator {
       case 'hexa':
         return this.calculateUpperSection(dice, 6)
       case 'poker':
-        return this.calculateFourOfAKind(dice)
+        return this.calculatePoker(dice)
       case 'fullHouse':
         return this.calculateFullHouse(dice)
       case 'smallStraight':
