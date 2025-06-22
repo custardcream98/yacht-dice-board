@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -23,18 +23,31 @@ interface MobileScoreInputProps {
   onClose?: () => void
 }
 
-function MobileScoreInput({ category, onScoreSubmit, onClose }: MobileScoreInputProps) {
-  const [dice, setDice] = useState<number[]>([1, 1, 1, 1, 1])
+type Dice = [number, number, number, number, number]
+const INITIAL_DICE = [1, 1, 1, 1, 1] as const satisfies Dice
+function ScoreInputContents({ category, onScoreSubmit, onClose }: MobileScoreInputProps) {
+  const [dice, setDice] = useState<Dice>(INITIAL_DICE)
   const [manualScore, setManualScore] = useState('')
   const [inputMode, setInputMode] = useState<'dice' | 'manual'>('dice')
 
   const calculatedScore = YachtDiceCalculator.calculateScore(category, dice)
 
-  const updateDice = (index: number, value: number) => {
-    const newDice = [...dice]
-    newDice[index] = Math.max(1, Math.min(6, value))
-    setDice(newDice)
-  }
+  // 최적화된 주사위 업데이트 함수
+  const incrementDice = useCallback((index: number) => {
+    setDice(prevDice => {
+      const newDice: Dice = [...prevDice]
+      newDice[index] = prevDice[index] + 1
+      return newDice
+    })
+  }, [])
+
+  const decrementDice = useCallback((index: number) => {
+    setDice(prevDice => {
+      const newDice: Dice = [...prevDice]
+      newDice[index] = prevDice[index] - 1
+      return newDice
+    })
+  }, [])
 
   const handleSubmit = () => {
     const score = inputMode === 'dice' ? calculatedScore : parseInt(manualScore) || 0
@@ -74,7 +87,7 @@ function MobileScoreInput({ category, onScoreSubmit, onClose }: MobileScoreInput
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => updateDice(index, value + 1)}
+                    onClick={() => incrementDice(index)}
                     className="h-8 w-full p-0"
                     disabled={value >= 6}
                   >
@@ -86,7 +99,7 @@ function MobileScoreInput({ category, onScoreSubmit, onClose }: MobileScoreInput
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => updateDice(index, value - 1)}
+                    onClick={() => decrementDice(index)}
                     className="h-8 w-full p-0"
                     disabled={value <= 1}
                   >
@@ -222,7 +235,7 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
                         {CATEGORY_NAMES[category]}
                       </DialogTitle>
                     </DialogHeader>
-                    <MobileScoreInput
+                    <ScoreInputContents
                       category={category}
                       onScoreSubmit={handleScoreSubmit}
                       onClose={() => setOpenDialog(null)}
@@ -282,7 +295,7 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
                     <DialogHeader>
                       <DialogTitle>{CATEGORY_NAMES[category]}</DialogTitle>
                     </DialogHeader>
-                    <MobileScoreInput
+                    <ScoreInputContents
                       category={category}
                       onScoreSubmit={handleScoreSubmit}
                       onClose={() => setOpenDialog(null)}
