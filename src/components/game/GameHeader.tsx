@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { LinkShareButton } from './LinkShareButton'
 import { ArrowLeft, Share2, Trash2, AlertTriangle, Users, ExternalLink, Monitor, UserPlus, Lock } from 'lucide-react'
 import { GameRoom, Player } from '@/types/game'
+import Link from 'next/link'
 
 interface GameHeaderProps {
   gameRoom: GameRoom
@@ -95,9 +96,11 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
                     </div>
 
                     <div className="flex gap-2 pt-2">
-                      <Button onClick={() => window.open(boardUrl, '_blank')} variant="outline" className="flex-1">
-                        <ExternalLink className="h-4 w-4 mr-1" />
-                        전광판 열기
+                      <Button asChild variant="outline" className="flex-1">
+                        <Link href={boardUrl} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="h-4 w-4 mr-1" />
+                          전광판 열기
+                        </Link>
                       </Button>
                       <Button onClick={() => setIsShareDialogOpen(false)} variant="secondary" className="flex-1">
                         닫기

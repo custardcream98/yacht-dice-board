@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Crown, Trophy, Medal, Target, TrendingUp, RotateCcw, AlertTriangle } from 'lucide-react'
 import { GameRoom, Player } from '@/types/game'
 import { YachtDiceCalculator } from '@/lib/yacht-dice-rules'
+import Link from 'next/link'
 
 interface GameFinishedProps {
   gameRoom: GameRoom
@@ -162,12 +163,11 @@ export function GameFinished({ gameRoom, myPlayer, onRestartGame }: GameFinished
             <p className="text-lg mb-4">🎉 모든 플레이어가 게임을 완료했습니다! 🎉</p>
 
             <div className="space-y-3">
-              <Button
-                onClick={() => window.open(`/board/${gameRoom.id}`, '_blank')}
-                className="w-full h-12 text-lg font-bold"
-              >
-                <TrendingUp className="h-5 w-5 mr-2" />
-                전광판에서 전체 결과 보기
+              <Button asChild className="w-full h-12 text-lg font-bold">
+                <Link href={`/board/${gameRoom.id}`}>
+                  <TrendingUp className="h-5 w-5 mr-2" />
+                  전광판에서 전체 결과 보기
+                </Link>
               </Button>
 
               <Dialog open={isRestartDialogOpen} onOpenChange={setIsRestartDialogOpen}>

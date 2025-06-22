@@ -2,6 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { TrendingUp, Monitor } from 'lucide-react'
 import {
   AppHeader,
   InviteNotice,
@@ -12,6 +15,7 @@ import {
   AppFooter,
 } from '@/components/home'
 import { useGameRoomActions } from '@/hooks'
+import Link from 'next/link'
 
 export default function HomePage({ roomId }: { roomId: string }) {
   const router = useRouter()
@@ -54,6 +58,16 @@ export default function HomePage({ roomId }: { roomId: string }) {
 
         {/* 방 참여 */}
         <JoinRoomCard playerName={playerName} inviteRoomId={roomId || undefined} onJoinRoom={handleJoinRoom} />
+
+        {/* 전광판 바로가기 */}
+        {roomId && (
+          <Button asChild variant="outline" className="w-full h-12 text-lg font-bold">
+            <Link href={`/board/${roomId}`}>
+              <Monitor className="h-5 w-5 mr-2" />
+              전광판으로 이동하기
+            </Link>
+          </Button>
+        )}
 
         {/* 방 삭제 */}
         {!roomId && <DeleteRoomCard onDeleteRoom={handleDeleteRoom} />}
