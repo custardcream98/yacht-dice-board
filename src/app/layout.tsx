@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { pretendard } from '@/lib/fonts'
 
 export const metadata: Metadata = {
   title: {
@@ -17,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className="antialiased">{children}</body>
+      <body className={`antialiased ${pretendard.className}`}>{children}</body>
     </html>
   )
 }
