@@ -40,7 +40,7 @@ export function GameHeader({ gameRoom, myPlayer, onDeleteRoom }: GameHeaderProps
   }
 
   return (
-    <div className="bg-white shadow-sm border-b sticky top-0 z-10">
+    <div className="bg-white shadow-sm border-b sticky top-0 z-20">
       <div className="p-4">
         <div className="flex items-center justify-between">
           <Button

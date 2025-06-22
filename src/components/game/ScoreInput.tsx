@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { YachtDiceCalculator, CATEGORY_NAMES } from '@/lib/yacht-dice-rules'
 import { ScoreCategory, Player } from '@/types/game'
-import { UPPER_SECTION_CATEGORIES, LOWER_SECTION_CATEGORIES } from '@/constants/game'
+import { UPPER_SECTION_CATEGORIES, LOWER_SECTION_CATEGORIES, UPPER_SECTION_DICE_COUNT } from '@/constants/game'
 import { Calculator, Lock, Check, Target, Plus, Minus, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6 } from 'lucide-react'
 
 const DiceIcon = ({ value }: { value: number }) => {
@@ -19,11 +19,11 @@ const DiceIcon = ({ value }: { value: number }) => {
 
 interface MobileScoreInputProps {
   category: ScoreCategory
-  currentScore?: number
   onScoreSubmit: (category: ScoreCategory, score: number) => void
+  onClose?: () => void
 }
 
-function MobileScoreInput({ category, currentScore, onScoreSubmit }: MobileScoreInputProps) {
+function MobileScoreInput({ category, onScoreSubmit, onClose }: MobileScoreInputProps) {
   const [dice, setDice] = useState<number[]>([1, 1, 1, 1, 1])
   const [manualScore, setManualScore] = useState('')
   const [inputMode, setInputMode] = useState<'dice' | 'manual'>('dice')
@@ -39,21 +39,13 @@ function MobileScoreInput({ category, currentScore, onScoreSubmit }: MobileScore
   const handleSubmit = () => {
     const score = inputMode === 'dice' ? calculatedScore : parseInt(manualScore) || 0
     onScoreSubmit(category, score)
+    onClose?.()
   }
 
-  const isUpperSection = UPPER_SECTION_CATEGORIES.includes(category)
+  const isUpperSection = UPPER_SECTION_CATEGORIES.some(c => c === category)
 
   return (
     <div className="space-y-4">
-      <div className="text-center">
-        <h3 className="text-lg font-bold mb-2">{CATEGORY_NAMES[category]}</h3>
-        {currentScore !== undefined && (
-          <div className="text-sm text-gray-600 mb-2">
-            현재 점수: <span className="font-bold">{currentScore}점</span>
-          </div>
-        )}
-      </div>
-
       {/* 입력 모드 선택 */}
       <div className="flex gap-2 mb-4">
         <Button
@@ -154,6 +146,13 @@ interface ScoreInputProps {
 }
 
 export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProps) {
+  const [openDialog, setOpenDialog] = useState<ScoreCategory | null>(null)
+
+  const handleScoreSubmit = (category: ScoreCategory, score: number) => {
+    onScoreSubmit(category, score)
+    setOpenDialog(null) // 점수 제출 후 다이얼로그 닫기
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -171,34 +170,42 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
       <CardContent className="space-y-4">
         {/* 상위 섹션 */}
         <div>
-          <h3 className="font-bold mb-3 text-blue-700">상위 섹션 (1-6)</h3>
+          <h3 className="font-bold mb-3 text-blue-700">상위 섹션</h3>
           <div className="grid grid-cols-2 gap-2">
             {UPPER_SECTION_CATEGORIES.map(category => {
               const score = myPlayer?.scores[category]
               const isScored = score !== undefined
               const isDisabled = !isMyTurn || isScored
+              const isWaitingTurn = !isMyTurn && !isScored
 
               return (
-                <Dialog key={category}>
+                <Dialog key={category} open={openDialog === category} onOpenChange={() => setOpenDialog(null)}>
                   <DialogTrigger asChild>
                     <Button
                       variant={isScored ? 'secondary' : 'outline'}
-                      className={`h-16 flex flex-col items-center justify-center p-2 relative ${
-                        isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-50 hover:border-blue-300'
+                      className={`h-16 flex flex-col items-center justify-center p-2 relative overflow-hidden ${
+                        isWaitingTurn
+                          ? 'opacity-50 cursor-not-allowed'
+                          : isScored
+                            ? 'cursor-not-allowed bg-gradient-to-br from-blue-100 to-blue-200 border-blue-300 shadow-md transform scale-[1.02]'
+                            : 'hover:bg-blue-50 hover:border-blue-300'
                       }`}
-                      disabled={isDisabled}
+                      disabled={isWaitingTurn}
+                      onClick={() => !isDisabled && setOpenDialog(category)}
                     >
                       {isScored && (
-                        <div className="absolute top-1 right-1">
-                          <Check className="h-3 w-3 text-green-600" />
-                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 to-blue-100/40 pointer-events-none" />
                       )}
-                      <div className="flex items-center gap-1 mb-1">
-                        <DiceIcon value={parseInt(category.replace('s', '').slice(-1)) || 1} />
-                        <span className="text-xs font-bold">{CATEGORY_NAMES[category]}</span>
+                      <div className="flex items-center gap-1 mb-1 relative z-10">
+                        <DiceIcon value={UPPER_SECTION_DICE_COUNT[category]} />
+                        <span className={`text-xs font-bold ${isScored ? 'text-blue-700' : ''}`}>
+                          {CATEGORY_NAMES[category]}
+                        </span>
                       </div>
-                      <div className="text-lg font-bold">{isScored ? `${score}점` : '-'}</div>
-                      {!isMyTurn && !isScored && (
+                      <div className={`font-bold relative z-10 ${isScored ? 'text-blue-800 text-xl' : 'text-lg'}`}>
+                        {isScored ? `${score}점` : '-'}
+                      </div>
+                      {isWaitingTurn && (
                         <div className="absolute inset-0 flex items-center justify-center bg-gray-100/80 rounded">
                           <Lock className="h-4 w-4 text-gray-400" />
                         </div>
@@ -208,11 +215,15 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
                   <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle className="flex items-center gap-2">
-                        <DiceIcon value={parseInt(category.replace('s', '').slice(-1)) || 1} />
+                        <DiceIcon value={UPPER_SECTION_DICE_COUNT[category]} />
                         {CATEGORY_NAMES[category]}
                       </DialogTitle>
                     </DialogHeader>
-                    <MobileScoreInput category={category} currentScore={score} onScoreSubmit={onScoreSubmit} />
+                    <MobileScoreInput
+                      category={category}
+                      onScoreSubmit={handleScoreSubmit}
+                      onClose={() => setOpenDialog(null)}
+                    />
                   </DialogContent>
                 </Dialog>
               )
@@ -228,25 +239,33 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
               const score = myPlayer?.scores[category]
               const isScored = score !== undefined
               const isDisabled = !isMyTurn || isScored
+              const isWaitingTurn = !isMyTurn && !isScored
 
               return (
-                <Dialog key={category}>
+                <Dialog key={category} open={openDialog === category} onOpenChange={() => setOpenDialog(null)}>
                   <DialogTrigger asChild>
                     <Button
                       variant={isScored ? 'secondary' : 'outline'}
-                      className={`h-16 flex items-center justify-between p-4 relative ${
-                        isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-50 hover:border-green-300'
+                      className={`h-16 flex items-center justify-between p-4 relative overflow-hidden ${
+                        isWaitingTurn
+                          ? 'opacity-50 cursor-not-allowed'
+                          : isScored
+                            ? 'cursor-not-allowed bg-gradient-to-br from-green-100 to-green-200 border-green-300 shadow-md transform scale-[1.01]'
+                            : 'hover:bg-green-50 hover:border-green-300'
                       }`}
-                      disabled={isDisabled}
+                      disabled={isWaitingTurn}
+                      onClick={() => !isDisabled && setOpenDialog(category)}
                     >
                       {isScored && (
-                        <div className="absolute top-2 right-2">
-                          <Check className="h-4 w-4 text-green-600" />
-                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-br from-green-50/40 to-green-100/40 pointer-events-none" />
                       )}
-                      <span className="font-bold">{CATEGORY_NAMES[category]}</span>
-                      <span className="text-lg font-bold">{isScored ? `${score}점` : '-'}</span>
-                      {!isMyTurn && !isScored && (
+                      <span className={`font-bold relative z-10 ${isScored ? 'text-green-700' : ''}`}>
+                        {CATEGORY_NAMES[category]}
+                      </span>
+                      <span className={`font-bold relative z-10 ${isScored ? 'text-green-800 text-xl' : 'text-lg'}`}>
+                        {isScored ? `${score}점` : '-'}
+                      </span>
+                      {isWaitingTurn && (
                         <div className="absolute inset-0 flex items-center justify-center bg-gray-100/80 rounded">
                           <Lock className="h-5 w-5 text-gray-400" />
                         </div>
@@ -257,7 +276,11 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
                     <DialogHeader>
                       <DialogTitle>{CATEGORY_NAMES[category]}</DialogTitle>
                     </DialogHeader>
-                    <MobileScoreInput category={category} currentScore={score} onScoreSubmit={onScoreSubmit} />
+                    <MobileScoreInput
+                      category={category}
+                      onScoreSubmit={handleScoreSubmit}
+                      onClose={() => setOpenDialog(null)}
+                    />
                   </DialogContent>
                 </Dialog>
               )

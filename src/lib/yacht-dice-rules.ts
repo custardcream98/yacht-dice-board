@@ -58,19 +58,19 @@ export class YachtDiceCalculator {
   // 메인 점수 계산 함수
   static calculateScore(category: ScoreCategory, dice: number[]): number {
     switch (category) {
-      case 'ones':
+      case 'ace':
         return this.calculateUpperSection(dice, 1)
-      case 'twos':
+      case 'dual':
         return this.calculateUpperSection(dice, 2)
-      case 'threes':
+      case 'triple':
         return this.calculateUpperSection(dice, 3)
-      case 'fours':
+      case 'quad':
         return this.calculateUpperSection(dice, 4)
-      case 'fives':
+      case 'penta':
         return this.calculateUpperSection(dice, 5)
-      case 'sixes':
+      case 'hexa':
         return this.calculateUpperSection(dice, 6)
-      case 'fourOfAKind':
+      case 'poker':
         return this.calculateFourOfAKind(dice)
       case 'fullHouse':
         return this.calculateFullHouse(dice)
@@ -142,16 +142,20 @@ export class YachtDiceCalculator {
 
 // 카테고리 한글 이름 매핑
 export const CATEGORY_NAMES: Record<ScoreCategory, string> = {
-  ones: 'Ace',
-  twos: 'Dual',
-  threes: 'Triple',
-  fours: 'Quad',
-  fives: 'Penta',
-  sixes: 'Hexa',
-  fourOfAKind: 'Four of a Kind',
+  ace: 'Ace',
+  dual: 'Dual',
+  triple: 'Triple',
+  quad: 'Quad',
+  penta: 'Penta',
+  hexa: 'Hexa',
+  poker: 'Poker',
   fullHouse: 'Full House',
   smallStraight: 'Small Straight',
   largeStraight: 'Large Straight',
   yacht: 'Yacht',
   choice: 'Choice',
+}
+
+export const UPPER_SECTION_DICE_COUNT = {
+  ones: 1,
 }
