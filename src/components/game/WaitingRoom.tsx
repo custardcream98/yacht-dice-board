@@ -13,10 +13,6 @@ interface WaitingRoomProps {
 }
 
 export function WaitingRoom({ gameRoom, myPlayer, onStartGame }: WaitingRoomProps) {
-  if (gameRoom.status !== 'waiting') {
-    return null
-  }
-
   return (
     <Card>
       <CardHeader>

@@ -13,7 +13,7 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
   const router = useRouter()
 
   const { gameRoom, loading, error } = useGameRoomData(roomId)
-  const { startGame, updateScore } = useGamePlay()
+  const { startGame, updateScore, restartGame } = useGamePlay()
   const { deleteRoom } = useGameRoomActions()
 
   // 현재 사용자와 현재 차례 플레이어 찾기
@@ -47,6 +47,15 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
   const handleDeleteRoom = async () => {
     await deleteRoom(roomId)
     alert('방이 성공적으로 삭제되었습니다.')
+  }
+
+  // 게임 재시작 핸들러
+  const handleRestartGame = async () => {
+    try {
+      await restartGame(roomId)
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '게임 재시작에 실패했습니다.')
+    }
   }
 
   if (loading) {
@@ -118,7 +127,9 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
 
       <div className="p-4 space-y-4">
         {/* 게임 시작 전 대기실 */}
-        <WaitingRoom gameRoom={gameRoom} myPlayer={myPlayer} onStartGame={handleStartGame} />
+        {gameRoom.status === 'waiting' && (
+          <WaitingRoom gameRoom={gameRoom} myPlayer={myPlayer} onStartGame={handleStartGame} />
+        )}
 
         {/* 게임 진행 중 */}
         {gameRoom.status === 'playing' && (
@@ -132,7 +143,9 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
         )}
 
         {/* 게임 종료 */}
-        <GameFinished gameRoom={gameRoom} />
+        {gameRoom.status === 'finished' && (
+          <GameFinished gameRoom={gameRoom} myPlayer={myPlayer} onRestartGame={handleRestartGame} />
+        )}
 
         {/* 하단 정보 */}
         <div className="text-center text-sm text-gray-500 pb-4">

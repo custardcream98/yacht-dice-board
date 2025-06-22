@@ -1,39 +1,210 @@
 'use client'
 
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Crown, Trophy } from 'lucide-react'
-import { GameRoom } from '@/types/game'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Crown, Trophy, Medal, Target, TrendingUp, RotateCcw, AlertTriangle } from 'lucide-react'
+import { GameRoom, Player } from '@/types/game'
+import { YachtDiceCalculator } from '@/lib/yacht-dice-rules'
 
 interface GameFinishedProps {
   gameRoom: GameRoom
+  myPlayer: Player
+  onRestartGame: () => void
 }
 
-export function GameFinished({ gameRoom }: GameFinishedProps) {
-  if (gameRoom.status !== 'finished') {
-    return null
+export function GameFinished({ gameRoom, myPlayer, onRestartGame }: GameFinishedProps) {
+  const [isRestartDialogOpen, setIsRestartDialogOpen] = useState(false)
+
+  const handleRestartGame = () => {
+    if (onRestartGame) {
+      onRestartGame()
+      setIsRestartDialogOpen(false)
+    }
   }
 
+  // 플레이어 순위 계산
+  const getPlayerRankings = () => {
+    return gameRoom.players
+      .map(player => ({
+        ...player,
+        total: YachtDiceCalculator.calculateTotalScore(player.scores),
+      }))
+      .sort((a, b) => b.total - a.total)
+  }
+
+  const rankings = getPlayerRankings()
+  const myRanking = rankings.findIndex(p => p.id === myPlayer.id) + 1
+  const upperSectionTotal = YachtDiceCalculator.calculateUpperSectionTotal(myPlayer.scores)
+  const lowerSectionTotal = YachtDiceCalculator.calculateLowerSectionTotal(myPlayer.scores)
+  const bonus = YachtDiceCalculator.calculateUpperBonus(myPlayer.scores)
+  const myTotalScore = upperSectionTotal + lowerSectionTotal + bonus
+  const winner = rankings[0]
+
+  // 순위에 따른 메시지와 아이콘
+  const getRankingDisplay = () => {
+    if (myRanking === 1) {
+      return {
+        icon: <Crown className="h-8 w-8 text-yellow-500" />,
+        emoji: '🥇',
+        title: '우승!',
+        message: '축하합니다! 1등을 차지하셨습니다!',
+        bgColor: 'bg-gradient-to-r from-yellow-50 to-amber-50',
+        borderColor: 'border-yellow-200',
+        textColor: 'text-yellow-800',
+      }
+    } else if (myRanking === 2) {
+      return {
+        icon: <Medal className="h-8 w-8 text-gray-500" />,
+        emoji: '🥈',
+        title: '2등!',
+        message: '훌륭합니다! 2등을 차지하셨습니다!',
+        bgColor: 'bg-gradient-to-r from-gray-50 to-slate-50',
+        borderColor: 'border-gray-200',
+        textColor: 'text-gray-800',
+      }
+    } else if (myRanking === 3) {
+      return {
+        icon: <Medal className="h-8 w-8 text-orange-500" />,
+        emoji: '🥉',
+        title: '3등!',
+        message: '좋습니다! 3등을 차지하셨습니다!',
+        bgColor: 'bg-gradient-to-r from-orange-50 to-amber-50',
+        borderColor: 'border-orange-200',
+        textColor: 'text-orange-800',
+      }
+    } else {
+      return {
+        icon: <Target className="h-8 w-8 text-blue-500" />,
+        emoji: '🎯',
+        title: `${myRanking}등`,
+        message: '수고하셨습니다! 다음 게임에서 더 좋은 결과를 기대해보세요!',
+        bgColor: 'bg-gradient-to-r from-blue-50 to-indigo-50',
+        borderColor: 'border-blue-200',
+        textColor: 'text-blue-800',
+      }
+    }
+  }
+
+  const rankingDisplay = getRankingDisplay()
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-center flex items-center justify-center gap-2">
-          <Crown className="h-6 w-6 text-yellow-500" />
-          게임 종료
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="text-center">
-          <p className="text-lg mb-4">🎉 게임이 종료되었습니다! 🎉</p>
-          <Button
-            onClick={() => window.open(`/board/${gameRoom.id}`, '_blank')}
-            className="w-full h-12 text-lg font-bold"
-          >
-            <Trophy className="h-5 w-5 mr-2" />
-            전광판에서 결과 보기
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      {/* 내 최종 결과 */}
+      {rankingDisplay && (
+        <Card className={`${rankingDisplay.bgColor} ${rankingDisplay.borderColor} border-2`}>
+          <CardHeader>
+            <CardTitle className={`text-center flex items-center justify-center gap-3 ${rankingDisplay.textColor}`}>
+              {rankingDisplay.icon}
+              <div>
+                <div className="text-3xl mb-1">{rankingDisplay.emoji}</div>
+                <div className="text-xl font-bold">{rankingDisplay.title}</div>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-center">
+              <p className={`text-lg mb-4 ${rankingDisplay.textColor}`}>{rankingDisplay.message}</p>
+
+              {/* 내 최종 점수 */}
+              <div className="bg-white/70 rounded-lg p-4 mb-4">
+                <div className="text-sm text-gray-600 mb-2">내 최종 점수</div>
+                <div className="text-4xl font-bold text-gray-800 mb-2">{myTotalScore}점</div>
+                <div className="text-sm text-gray-600">
+                  {gameRoom.players.length}명 중 {myRanking}등
+                </div>
+              </div>
+
+              {/* 점수 상세 분석 */}
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="bg-white/50 rounded-lg p-3">
+                  <div className="text-gray-600">상위 섹션</div>
+                  <div className="text-lg font-bold">{upperSectionTotal}점</div>
+                </div>
+                <div className="bg-white/50 rounded-lg p-3">
+                  <div className="text-gray-600">보너스</div>
+                  <div className="text-lg font-bold text-blue-600">{bonus}점</div>
+                </div>
+                <div className="bg-white/50 rounded-lg p-3">
+                  <div className="text-gray-600">하위 섹션</div>
+                  <div className="text-lg font-bold">{lowerSectionTotal}점</div>
+                </div>
+                <div className="bg-white/50 rounded-lg p-3">
+                  <div className="text-gray-600">총합</div>
+                  <div className="text-lg font-bold text-green-600">{myTotalScore}점</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 게임 종료 정보 및 전광판 버튼 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-center flex items-center justify-center gap-2">
+            <Trophy className="h-6 w-6 text-yellow-500" />
+            게임 종료
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center space-y-4">
+            {/* 우승자 정보 */}
+            {winner && (
+              <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                <div className="text-lg mb-2">🏆 우승자</div>
+                <div className="font-bold text-xl text-yellow-800">{winner.name}</div>
+                <div className="text-lg font-mono text-yellow-700">{winner.total}점</div>
+              </div>
+            )}
+
+            <p className="text-lg mb-4">🎉 모든 플레이어가 게임을 완료했습니다! 🎉</p>
+
+            <div className="space-y-3">
+              <Button
+                onClick={() => window.open(`/board/${gameRoom.id}`, '_blank')}
+                className="w-full h-12 text-lg font-bold"
+              >
+                <TrendingUp className="h-5 w-5 mr-2" />
+                전광판에서 전체 결과 보기
+              </Button>
+
+              <Dialog open={isRestartDialogOpen} onOpenChange={setIsRestartDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full h-12 text-lg font-bold">
+                    <RotateCcw className="h-5 w-5 mr-2" />새 게임 시작하기
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="w-[95vw] max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-orange-500" />
+                      게임 재시작 확인
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <p className="text-lg mb-2">정말로 새 게임을 시작하시겠습니까?</p>
+                      <p className="text-sm text-gray-600 mb-4">
+                        현재 게임의 모든 점수가 초기화되고, 새로운 순서로 게임이 시작됩니다.
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={() => setIsRestartDialogOpen(false)} className="flex-1">
+                        취소
+                      </Button>
+                      <Button onClick={handleRestartGame} className="flex-1">
+                        <RotateCcw className="h-4 w-4 mr-2" />새 게임 시작
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

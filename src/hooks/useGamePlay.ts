@@ -1,7 +1,16 @@
 import { useState } from 'react'
 import { doc, updateDoc, getDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import { GameRoom, ScoreCategory } from '@/types/game'
+import { GameRoom, Player, ScoreCategory } from '@/types/game'
+
+const shufflePlayers = (players: Player[]) => {
+  const shuffledPlayers = [...players]
+  for (let i = shuffledPlayers.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffledPlayers[i], shuffledPlayers[j]] = [shuffledPlayers[j], shuffledPlayers[i]]
+  }
+  return shuffledPlayers
+}
 
 /**
  * 게임 플레이 관련 기능을 담당하는 훅
@@ -27,20 +36,7 @@ export function useGamePlay() {
       const room = roomDoc.data() as GameRoom
 
       // Fisher-Yates 셔플 알고리즘으로 플레이어 순서 랜덤하게 섞기
-      const shuffledPlayers = [...room.players]
-      for (let i = shuffledPlayers.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1))
-        ;[shuffledPlayers[i], shuffledPlayers[j]] = [shuffledPlayers[j], shuffledPlayers[i]]
-      }
-
-      console.log(
-        '게임 시작 - 원래 순서:',
-        room.players.map(p => p.name),
-      )
-      console.log(
-        '게임 시작 - 섞인 순서:',
-        shuffledPlayers.map(p => p.name),
-      )
+      const shuffledPlayers = shufflePlayers(room.players)
 
       await updateDoc(roomRef, {
         players: shuffledPlayers,
@@ -125,10 +121,50 @@ export function useGamePlay() {
     }
   }
 
+  // 게임 재시작
+  const restartGame = async (roomId: string): Promise<void> => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const roomRef = doc(db, 'gameRooms', roomId)
+      const roomDoc = await getDoc(roomRef)
+
+      if (!roomDoc.exists()) {
+        throw new Error('존재하지 않는 방입니다.')
+      }
+
+      const room = roomDoc.data() as GameRoom
+
+      // 모든 플레이어의 점수 초기화
+      const resetPlayers = shufflePlayers(
+        room.players.map(player => ({
+          ...player,
+          scores: {},
+        })),
+      )
+
+      await updateDoc(roomRef, {
+        players: resetPlayers,
+        status: 'playing',
+        currentPlayerIndex: 0,
+        currentRound: 1,
+        updatedAt: Date.now(),
+      })
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : '게임 재시작에 실패했습니다.'
+      setError(errorMessage)
+      throw new Error(errorMessage)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return {
     loading,
     error,
     startGame,
     updateScore,
+    restartGame,
   }
 }

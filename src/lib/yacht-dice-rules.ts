@@ -109,9 +109,10 @@ export class YachtDiceCalculator {
 
   // 총점 계산
   static calculateTotalScore(scores: ScoreCard): number {
-    const total = Object.values(scores).reduce((sum, score) => sum + (score || 0), 0)
+    const upperTotal = this.calculateUpperSectionTotal(scores)
+    const lowerTotal = this.calculateLowerSectionTotal(scores)
     const bonus = this.calculateUpperBonus(scores)
-    return total + bonus
+    return upperTotal + lowerTotal + bonus
   }
 
   // 유틸리티 함수들

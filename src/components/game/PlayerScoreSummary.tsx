@@ -14,7 +14,7 @@ export function PlayerScoreSummary({ player }: PlayerScoreSummaryProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Trophy className="h-5 w-5" />내 점수 ({player.name})
+          <Trophy className="h-5 w-5" />내 점수
         </CardTitle>
       </CardHeader>
       <CardContent>

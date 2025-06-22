@@ -40,12 +40,12 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
 
   // 총점 계산
   const calculatePlayerTotal = (player: Player): number => {
-    return YachtDiceCalculator.calculateTotalScore(player.scores as Record<string, number>)
+    return YachtDiceCalculator.calculateTotalScore(player.scores)
   }
 
   // 보너스 점수 계산
   const calculateUpperBonus = (player: Player): number => {
-    return YachtDiceCalculator.calculateUpperBonus(player.scores as Record<string, number>)
+    return YachtDiceCalculator.calculateUpperBonus(player.scores)
   }
 
   // 순위 계산
