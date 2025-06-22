@@ -30,7 +30,7 @@ function MobileScoreInput({ category, onScoreSubmit, onClose }: MobileScoreInput
 
   const calculatedScore = YachtDiceCalculator.calculateScore(category, dice)
 
-  const updateDie = (index: number, value: number) => {
+  const updateDice = (index: number, value: number) => {
     const newDice = [...dice]
     newDice[index] = Math.max(1, Math.min(6, value))
     setDice(newDice)
@@ -74,7 +74,7 @@ function MobileScoreInput({ category, onScoreSubmit, onClose }: MobileScoreInput
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => updateDie(index, value + 1)}
+                    onClick={() => updateDice(index, value + 1)}
                     className="h-8 w-full p-0"
                     disabled={value >= 6}
                   >
@@ -86,7 +86,7 @@ function MobileScoreInput({ category, onScoreSubmit, onClose }: MobileScoreInput
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => updateDie(index, value - 1)}
+                    onClick={() => updateDice(index, value - 1)}
                     className="h-8 w-full p-0"
                     disabled={value <= 1}
                   >
@@ -175,11 +175,14 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
             {UPPER_SECTION_CATEGORIES.map(category => {
               const score = myPlayer?.scores[category]
               const isScored = score !== undefined
-              const isDisabled = !isMyTurn || isScored
               const isWaitingTurn = !isMyTurn && !isScored
 
               return (
-                <Dialog key={category} open={openDialog === category} onOpenChange={() => setOpenDialog(null)}>
+                <Dialog
+                  key={category}
+                  open={openDialog === category}
+                  onOpenChange={close => !close && setOpenDialog(null)}
+                >
                   <DialogTrigger asChild>
                     <Button
                       variant={isScored ? 'secondary' : 'outline'}
@@ -187,11 +190,11 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
                         isWaitingTurn
                           ? 'opacity-50 cursor-not-allowed'
                           : isScored
-                            ? 'cursor-not-allowed bg-gradient-to-br from-blue-100 to-blue-200 border-blue-300 shadow-md transform scale-[1.02]'
+                            ? 'cursor-not-allowed bg-gradient-to-br from-blue-100 to-blue-200 border-blue-300 shadow-md transform'
                             : 'hover:bg-blue-50 hover:border-blue-300'
                       }`}
                       disabled={isWaitingTurn}
-                      onClick={() => !isDisabled && setOpenDialog(category)}
+                      onClick={() => !isScored && setOpenDialog(category)}
                     >
                       {isScored && (
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 to-blue-100/40 pointer-events-none" />
@@ -238,11 +241,14 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
             {LOWER_SECTION_CATEGORIES.map(category => {
               const score = myPlayer?.scores[category]
               const isScored = score !== undefined
-              const isDisabled = !isMyTurn || isScored
-              const isWaitingTurn = !isMyTurn && !isScored
+              const isWaitingTurn = !isMyTurn
 
               return (
-                <Dialog key={category} open={openDialog === category} onOpenChange={() => setOpenDialog(null)}>
+                <Dialog
+                  key={category}
+                  open={openDialog === category}
+                  onOpenChange={close => !close && setOpenDialog(null)}
+                >
                   <DialogTrigger asChild>
                     <Button
                       variant={isScored ? 'secondary' : 'outline'}
@@ -250,11 +256,11 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
                         isWaitingTurn
                           ? 'opacity-50 cursor-not-allowed'
                           : isScored
-                            ? 'cursor-not-allowed bg-gradient-to-br from-green-100 to-green-200 border-green-300 shadow-md transform scale-[1.01]'
+                            ? 'cursor-not-allowed bg-gradient-to-br from-green-100 to-green-200 border-green-300 shadow-md transform'
                             : 'hover:bg-green-50 hover:border-green-300'
                       }`}
                       disabled={isWaitingTurn}
-                      onClick={() => !isDisabled && setOpenDialog(category)}
+                      onClick={() => !isScored && setOpenDialog(category)}
                     >
                       {isScored && (
                         <div className="absolute inset-0 bg-gradient-to-br from-green-50/40 to-green-100/40 pointer-events-none" />
