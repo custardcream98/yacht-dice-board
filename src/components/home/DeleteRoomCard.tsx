@@ -61,7 +61,7 @@ export function DeleteRoomCard({ onDeleteRoom }: DeleteRoomCardProps) {
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
                   <div className="text-sm text-red-700">
-                    <p className="font-medium mb-2">⚠️ 주의사항</p>
+                    <p className="font-medium mb-2">주의사항</p>
                     <ul className="list-disc list-inside space-y-1 text-xs">
                       <li>모든 플레이어가 방에서 나가게 됩니다</li>
                       <li>게임 진행 상황과 점수가 모두 삭제됩니다</li>
