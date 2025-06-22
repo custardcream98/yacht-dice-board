@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { YachtDiceCalculator, CATEGORY_NAMES } from '@/lib/yacht-dice-rules'
 import { ScoreCategory, Player } from '@/types/game'
 import { UPPER_SECTION_CATEGORIES, LOWER_SECTION_CATEGORIES, UPPER_SECTION_DICE_COUNT } from '@/constants/game'
-import { Calculator, Lock, Check, Target, Plus, Minus, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6 } from 'lucide-react'
+import { Calculator, Lock, Target, Plus, Minus, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6 } from 'lucide-react'
 
 const DiceIcon = ({ value }: { value: number }) => {
   const icons = [Dice1, Dice2, Dice3, Dice4, Dice5, Dice6]

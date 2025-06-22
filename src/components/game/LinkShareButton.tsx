@@ -19,7 +19,7 @@ export function LinkShareButton({ url, label, icon: Icon }: LinkShareButtonProps
       await navigator.clipboard.writeText(url)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
+    } catch {
       // 클립보드 API가 지원되지 않는 경우 폴백
       const textArea = document.createElement('textarea')
       textArea.value = url
