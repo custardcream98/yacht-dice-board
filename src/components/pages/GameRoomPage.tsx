@@ -137,8 +137,8 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
             {/* 점수 입력 */}
             <ScoreInput myPlayer={myPlayer} isMyTurn={!!isMyTurn} onScoreSubmit={handleScoreSubmit} />
 
-            {/* 내 점수 요약 */}
-            <PlayerScoreSummary player={myPlayer} />
+            {/* 플레이어 점수 요약 */}
+            <PlayerScoreSummary gameRoom={gameRoom} myPlayer={myPlayer} />
           </>
         )}
 
