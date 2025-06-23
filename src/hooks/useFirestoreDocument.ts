@@ -17,7 +17,7 @@ class FirestoreDocumentStore<T> {
     this.initPromise = this.initialize()
   }
 
-  private async initialize(): Promise<T> {
+  private async initialize(): Promise<null | T> {
     return new Promise((resolve, reject) => {
       this.unsubscribe = onSnapshot(
         this.docRef,
@@ -25,6 +25,7 @@ class FirestoreDocumentStore<T> {
           if (doc.exists()) {
             const newData = doc.data() as T
             this.data = newData
+            this.error = null // 에러 초기화
 
             if (!this.isInitialized) {
               this.isInitialized = true
@@ -36,6 +37,7 @@ class FirestoreDocumentStore<T> {
           } else {
             const error = new Error(this.notFoundErrorMessage)
             this.error = error
+            this.data = null
             if (!this.isInitialized) {
               this.isInitialized = true
               reject(error)
@@ -46,6 +48,7 @@ class FirestoreDocumentStore<T> {
         },
         error => {
           this.error = error
+          this.data = null
           if (!this.isInitialized) {
             this.isInitialized = true
             reject(error)
@@ -64,11 +67,14 @@ class FirestoreDocumentStore<T> {
     }
   }
 
+  // useSyncExternalStore용 - 에러를 throw하지 않고 데이터만 반환
   getSnapshot = () => {
-    if (this.error) {
-      throw this.error
-    }
     return this.data
+  }
+
+  // 에러 상태 확인용
+  getError = () => {
+    return this.error
   }
 
   // 초기 데이터 로딩을 위한 Promise
@@ -158,9 +164,11 @@ export function useFirestoreDocument<T>(docRef: DocumentReference, notFoundError
   }, [cacheKey])
 
   use(store.getInitPromise())
-  const data = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
 
-  if (!data) {
+  const data = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
+  const error = store.getError()
+
+  if (error || !data) {
     throw new Error(notFoundErrorMessage)
   }
 

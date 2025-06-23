@@ -17,8 +17,8 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
   const { deleteRoom } = useGameRoomActions()
 
   // 현재 사용자와 현재 차례 플레이어 찾기
-  const myPlayer = gameRoom?.players.find(p => p.name === playerName)
-  const currentPlayer = gameRoom?.players[gameRoom.currentPlayerIndex]
+  const myPlayer = gameRoom.players.find(p => p.name === playerName)
+  const currentPlayer = gameRoom.players[gameRoom.currentPlayerIndex]
 
   // 현재 플레이어의 차례인지 확인
   const isMyTurn = myPlayer && currentPlayer && myPlayer.id === currentPlayer.id
