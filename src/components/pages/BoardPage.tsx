@@ -55,18 +55,6 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
     return YachtDiceCalculator.calculateUpperBonus(player.scores)
   }
 
-  // 순위 계산
-  const getPlayerRankings = () => {
-    if (!gameRoom) return []
-
-    return gameRoom.players
-      .map(player => ({
-        ...player,
-        total: calculatePlayerTotal(player),
-      }))
-      .sort((a, b) => b.total - a.total)
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center">
@@ -94,7 +82,12 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
     )
   }
 
-  const rankings = getPlayerRankings()
+  const rankings = gameRoom.players
+    .map(player => ({
+      ...player,
+      total: calculatePlayerTotal(player),
+    }))
+    .sort((a, b) => b.total - a.total)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-700 p-4 relative">
