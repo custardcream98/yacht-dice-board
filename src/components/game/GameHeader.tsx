@@ -37,7 +37,7 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
 
   // 링크 생성
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-  const inviteUrl = `${baseUrl}/?roomId=${gameRoom.id}`
+  const inviteUrl = `${baseUrl}/invite/${gameRoom.id}`
   const boardUrl = `${baseUrl}/board/${gameRoom.id}`
 
   const handleDeleteRoom = async () => {

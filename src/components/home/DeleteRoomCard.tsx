@@ -6,25 +6,26 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Trash2, AlertTriangle } from 'lucide-react'
+import { useGameRoomActions } from '@/hooks'
 
-interface DeleteRoomCardProps {
-  onDeleteRoom: (roomId: string) => Promise<void>
-}
-
-export function DeleteRoomCard({ onDeleteRoom }: DeleteRoomCardProps) {
+export function DeleteRoomCard() {
   const [deleteRoomId, setDeleteRoomId] = useState('')
+  const roomId = deleteRoomId.trim()
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
+  const { deleteRoom } = useGameRoomActions()
+
   const handleDeleteRoom = async () => {
-    if (!deleteRoomId.trim()) {
+    if (!roomId) {
       alert('삭제할 방 ID를 입력해주세요.')
       return
     }
 
     setIsDeleting(true)
     try {
-      await onDeleteRoom(deleteRoomId.trim())
+      await deleteRoom(roomId)
+
       setDeleteRoomId('')
       setIsDeleteDialogOpen(false)
       alert('방이 성공적으로 삭제되었습니다.')
@@ -75,7 +76,7 @@ export function DeleteRoomCard({ onDeleteRoom }: DeleteRoomCardProps) {
                 <Button
                   variant="destructive"
                   onClick={handleDeleteRoom}
-                  disabled={isDeleting || !deleteRoomId.trim()}
+                  disabled={isDeleting || !roomId}
                   className="flex-1"
                 >
                   {isDeleting ? '삭제 중...' : '영구 삭제'}

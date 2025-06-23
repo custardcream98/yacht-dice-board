@@ -1,5 +1,3 @@
-'use client'
-
 export function AppFooter() {
   return (
     <div className="text-center text-sm text-gray-500">

@@ -1,5 +1,3 @@
-'use client'
-
 import { Dice6 } from 'lucide-react'
 
 export function AppHeader() {

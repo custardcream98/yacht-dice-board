@@ -17,7 +17,7 @@ export function QRCodeShareButton({ roomId, className }: QRCodeShareButtonProps)
 
   // 초대 링크 생성
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-  const inviteUrl = `${baseUrl}/?roomId=${roomId}`
+  const inviteUrl = `${baseUrl}/invite/${roomId}`
 
   // 클립보드에 링크 복사
   const copyToClipboard = async () => {

@@ -1,6 +1,4 @@
 export { AppHeader } from './AppHeader'
-export { InviteNotice } from './InviteNotice'
-export { PlayerNameInput } from './PlayerNameInput'
 export { CreateRoomCard } from './CreateRoomCard'
 export { JoinRoomCard } from './JoinRoomCard'
 export { DeleteRoomCard } from './DeleteRoomCard'
