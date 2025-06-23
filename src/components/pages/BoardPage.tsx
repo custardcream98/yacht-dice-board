@@ -11,6 +11,7 @@ import { SCORE_CATEGORIES, UPPER_SECTION_CATEGORIES } from '@/constants/game'
 import { Trophy, Users, Crown, Dice6, Maximize, Minimize } from 'lucide-react'
 import { useGameRoomData } from '@/hooks'
 import { cn } from '@/lib/utils'
+import { QRCodeShareButton } from '@/components/game'
 
 export default function GameBoardPage({ roomId }: { roomId: string }) {
   const { gameRoom, loading, error } = useGameRoomData(roomId)
@@ -97,25 +98,33 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-700 p-4 relative">
-      {/* 전체화면 토글 버튼 */}
-      <Button
-        onClick={toggleFullscreen}
-        className="fixed top-4 right-4 z-50 bg-white/20 hover:bg-white/30 text-white border-white/30"
-        size="sm"
-        variant="outline"
-      >
-        {isFullscreen ? (
-          <>
-            <Minimize className="h-4 w-4 mr-2" />
-            전체화면 해제
-          </>
-        ) : (
-          <>
-            <Maximize className="h-4 w-4 mr-2" />
-            전체화면
-          </>
+      {/* 상단 버튼들 */}
+      <div className="fixed top-4 right-4 z-50 flex gap-2">
+        {/* QR 코드 공유 버튼 */}
+        {gameRoom.status === 'waiting' && (
+          <QRCodeShareButton roomId={roomId} className="bg-white/20 hover:bg-white/30 text-white border-white/30" />
         )}
-      </Button>
+
+        {/* 전체화면 토글 버튼 */}
+        <Button
+          onClick={toggleFullscreen}
+          className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+          size="sm"
+          variant="outline"
+        >
+          {isFullscreen ? (
+            <>
+              <Minimize className="h-4 w-4 mr-2" />
+              전체화면 해제
+            </>
+          ) : (
+            <>
+              <Maximize className="h-4 w-4 mr-2" />
+              전체화면
+            </>
+          )}
+        </Button>
+      </div>
 
       <div className="container mx-auto max-w-7xl">
         {/* 헤더 */}

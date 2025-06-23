@@ -1,4 +1,5 @@
 export { LinkShareButton } from './LinkShareButton'
+export { QRCodeShareButton } from './QRCodeShareButton'
 export { GameHeader } from './GameHeader'
 export { WaitingRoom } from './WaitingRoom'
 export { ScoreInput } from './ScoreInput'
