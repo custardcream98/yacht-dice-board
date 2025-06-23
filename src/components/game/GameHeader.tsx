@@ -9,6 +9,7 @@ import { LinkShareButton } from './LinkShareButton'
 import { ArrowLeft, Share2, Trash2, AlertTriangle, Users, ExternalLink, Monitor, UserPlus, Lock } from 'lucide-react'
 import { GameRoom, Player } from '@/types/game'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
 
 interface GameHeaderProps {
   gameRoom: GameRoom
@@ -54,14 +55,15 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
   }
 
   return (
-    <div className="bg-white shadow-sm border-b sticky top-0 z-20">
+    <div
+      className={cn(
+        'bg-white shadow-sm border-b sticky top-0 z-20 transition-transform duration-200',
+        isScrolled && 'translate-y-[-44px] sm:translate-y-[-48px]',
+      )}
+    >
       <div className="p-3 sm:p-4">
         {/* 상단 버튼 영역 - 스크롤 시 숨김 */}
-        <div
-          className={`transition-all duration-300 overflow-hidden ${
-            isScrolled ? 'max-h-0 opacity-0' : 'max-h-20 opacity-100'
-          }`}
-        >
+        <div>
           <div className="flex items-center justify-between mb-3">
             <Button
               variant="ghost"
