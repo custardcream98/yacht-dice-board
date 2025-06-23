@@ -1,6 +1,6 @@
 'use client'
 
-import { UserPlus, Monitor, Users, Dice6, ArrowLeft, GamepadIcon } from 'lucide-react'
+import { UserPlus, Monitor, Users, ArrowLeft, GamepadIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useId, useState, useTransition } from 'react'
@@ -23,7 +23,7 @@ export default function InvitePage({ roomId }: InvitePageProps) {
   const name = playerName.trim()
   const [isJoining, setIsJoining] = useState(false)
 
-  const { gameRoom, loading, error } = useGameRoomData(roomId)
+  const { gameRoom } = useGameRoomData(roomId)
   const { joinRoom } = useGameRoomActions()
 
   const nameFormId = useId()
@@ -48,41 +48,6 @@ export default function InvitePage({ roomId }: InvitePageProps) {
     } finally {
       setIsJoining(false)
     }
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex flex-col items-center p-8">
-            <div className="animate-spin mb-4">
-              <Dice6 className="h-12 w-12 text-blue-600" />
-            </div>
-            <p className="text-lg text-center text-gray-700">게임 정보를 불러오는 중...</p>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  if (error || !gameRoom) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-red-50 border-red-200">
-          <CardContent className="text-center p-8">
-            <div className="text-red-600 mb-4">
-              <GamepadIcon className="h-12 w-12 mx-auto mb-3" />
-              <h2 className="text-xl font-bold mb-2">게임방을 찾을 수 없습니다</h2>
-              <p className="text-sm">{error || '방 ID를 확인하고 다시 시도해주세요.'}</p>
-            </div>
-            <Button className="w-full mt-4" onClick={() => router.push('/')} variant="outline">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              홈으로 돌아가기
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
   }
 
   return (

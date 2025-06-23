@@ -1,6 +1,6 @@
 'use client'
 
-import { Trophy, Users, Crown, Dice6, Maximize, Minimize } from 'lucide-react'
+import { Trophy, Users, Crown, Maximize, Minimize } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 import { QRCodeShareButton } from '@/components/game'
@@ -15,7 +15,7 @@ import { YachtDiceCalculator, CATEGORY_NAMES } from '@/lib/yacht-dice-rules'
 import { Player } from '@/types/game'
 
 export default function GameBoardPage({ roomId }: { roomId: string }) {
-  const { gameRoom, loading, error } = useGameRoomData(roomId)
+  const { gameRoom } = useGameRoomData(roomId)
   const [isFullscreen, setIsFullscreen] = useState(false)
 
   // 전체화면 상태 감지
@@ -54,33 +54,6 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
   // 보너스 점수 계산
   const calculateUpperBonus = (player: Player): number => {
     return YachtDiceCalculator.calculateUpperBonus(player.scores)
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center">
-        <div className="text-center">
-          <Dice6 className="h-12 w-12 animate-spin mx-auto mb-4 text-white" />
-          <p className="text-xl text-white">게임 정보를 불러오는 중...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (error || !gameRoom) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center">
-        <Card className="max-w-md w-full mx-4 bg-red-50 border-red-200">
-          <CardHeader>
-            <CardTitle className="text-red-600 text-center">연결 오류</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center">
-            <p className="text-red-600 mb-4">{error || '게임방을 찾을 수 없습니다.'}</p>
-            <p className="text-sm text-gray-600">방 ID를 확인하고 다시 시도해주세요.</p>
-          </CardContent>
-        </Card>
-      </div>
-    )
   }
 
   const rankings = gameRoom.players

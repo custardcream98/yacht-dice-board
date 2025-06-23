@@ -1,6 +1,6 @@
 'use client'
 
-import { Dice6, ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 import { GameHeader, WaitingRoom, ScoreInput, PlayerScoreSummary, GameFinished } from '@/components/game'
@@ -12,7 +12,7 @@ import { ScoreCategory } from '@/types/game'
 export default function GameRoomPage({ roomId, playerName }: { roomId: string; playerName: string }) {
   const router = useRouter()
 
-  const { gameRoom, loading, error } = useGameRoomData(roomId)
+  const { gameRoom } = useGameRoomData(roomId)
   const { startGame, updateScore, restartGame } = useGamePlay()
   const { deleteRoom } = useGameRoomActions()
 
@@ -56,38 +56,6 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
     } catch (err) {
       alert(err instanceof Error ? err.message : '게임 재시작에 실패했습니다.')
     }
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-sm">
-          <CardContent className="flex flex-col items-center p-8">
-            <div className="animate-spin mb-4">
-              <Dice6 className="h-12 w-12 text-blue-500" />
-            </div>
-            <p className="text-lg text-center">게임 정보를 불러오는 중...</p>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  if (error || !gameRoom) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-sm bg-red-50 border-red-200">
-          <CardContent className="text-center p-8">
-            <p className="text-red-600 mb-4">{error || '게임방을 찾을 수 없습니다.'}</p>
-            <p className="text-sm text-gray-600">방 ID를 확인하고 다시 시도해주세요.</p>
-            <Button className="mt-4 w-full" onClick={() => router.push('/')} variant="outline">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              홈으로 돌아가기
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
   }
 
   // 플레이어 이름이 없거나 해당 플레이어를 찾을 수 없는 경우
