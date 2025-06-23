@@ -1,6 +1,6 @@
 'use client'
 
-import { useId, useState } from 'react'
+import { useId, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -17,6 +17,7 @@ interface InvitePageProps {
 
 export default function InvitePage({ roomId }: InvitePageProps) {
   const router = useRouter()
+  const [isRouterPushPending, startTransition] = useTransition()
   const [playerName, setPlayerName] = useState('')
   const name = playerName.trim()
   const [isJoining, setIsJoining] = useState(false)
@@ -27,7 +28,9 @@ export default function InvitePage({ roomId }: InvitePageProps) {
   const nameFormId = useId()
 
   // 방 참여 핸들러
-  const handleJoinRoom = async () => {
+  const handleJoinRoom: React.FormEventHandler<HTMLFormElement> = async event => {
+    event.preventDefault()
+
     if (!name) {
       alert('플레이어 이름을 입력해주세요.')
       return
@@ -36,7 +39,9 @@ export default function InvitePage({ roomId }: InvitePageProps) {
     setIsJoining(true)
     try {
       await joinRoom(roomId, name)
-      router.push(`/room/${roomId}?player=${encodeURIComponent(name)}`)
+      startTransition(() => {
+        router.push(`/room/${roomId}?player=${encodeURIComponent(name)}`)
+      })
     } catch (error) {
       alert(error instanceof Error ? error.message : '방 참여에 실패했습니다.')
     } finally {
@@ -161,10 +166,14 @@ export default function InvitePage({ roomId }: InvitePageProps) {
               form={nameFormId}
               type="submit"
               className="w-full h-12 text-lg font-bold"
-              disabled={isJoining || !name}
+              disabled={isJoining || isRouterPushPending || !name}
             >
               <Users className="h-5 w-5 mr-2" />
-              {isJoining ? '참여 중...' : gameRoom.players.length === 0 ? '방장으로 시작하기' : '게임 참여하기'}
+              {isJoining || isRouterPushPending
+                ? '참여 중...'
+                : gameRoom.players.length === 0
+                  ? '방장으로 시작하기'
+                  : '게임 참여하기'}
             </Button>
           </CardContent>
         </Card>
