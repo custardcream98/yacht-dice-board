@@ -1,5 +1,3 @@
-'use client'
-
 import { Calculator, Lock, Target, Plus, Minus, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6 } from 'lucide-react'
 import { useState, useCallback } from 'react'
 
@@ -189,7 +187,7 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
             {UPPER_SECTION_CATEGORIES.map(category => {
               const score = myPlayer?.scores[category]
               const isScored = score !== undefined
-              const isWaitingTurn = !isMyTurn && !isScored
+              const isWaitingTurn = !isMyTurn
 
               return (
                 <Dialog
