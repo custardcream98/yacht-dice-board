@@ -7,7 +7,6 @@ export async function generateMetadata({ params }: { params: Promise<{ roomId: s
 
   // roomId 검증
   if (!roomId || typeof roomId !== 'string' || roomId.trim() === '') {
-    console.error('Invalid roomId:', roomId)
     return {
       title: '전광판',
       description: 'Yacht Dice 게임의 점수를 실시간으로 확인하세요.',
@@ -19,8 +18,6 @@ export async function generateMetadata({ params }: { params: Promise<{ roomId: s
   }
 
   try {
-    console.log('Fetching board data for roomId:', roomId)
-
     // Firebase Admin SDK로 방 정보 가져오기
     const roomDoc = await adminDb.collection('gameRooms').doc(roomId.trim()).get()
 
@@ -43,8 +40,6 @@ export async function generateMetadata({ params }: { params: Promise<{ roomId: s
         description = `${roomName}의 Yacht Dice 게임이 종료되었습니다. 최종 결과를 확인하세요.`
       }
 
-      console.log('Board data found:', { roomName, status, playerCount, currentRound, maxRounds })
-
       return {
         title,
         description,
@@ -54,7 +49,6 @@ export async function generateMetadata({ params }: { params: Promise<{ roomId: s
         },
       }
     } else {
-      console.log('Room not found for roomId:', roomId)
     }
   } catch (error) {
     console.error('메타데이터 생성 중 오류:', error)

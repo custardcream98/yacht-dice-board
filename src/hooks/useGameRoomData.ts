@@ -36,7 +36,6 @@ export function useGameRoomData(roomId?: string) {
         setLoading(false)
       },
       error => {
-        console.error('방 정보 구독 오류:', error)
         setError(error.message)
         setLoading(false)
       },

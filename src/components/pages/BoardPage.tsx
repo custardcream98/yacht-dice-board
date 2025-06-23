@@ -35,8 +35,8 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
       } else {
         await document.exitFullscreen()
       }
-    } catch (error) {
-      console.error('전체화면 전환 실패:', error)
+    } catch {
+      // noop
     }
   }
 

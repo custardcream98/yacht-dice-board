@@ -16,7 +16,6 @@ export async function generateMetadata({ params }: { params: Promise<{ roomId: s
 
   // roomId 검증
   if (!roomId || typeof roomId !== 'string' || roomId.trim() === '') {
-    console.error('Invalid roomId:', roomId)
     return DEFAULT_METADATA
   }
 
@@ -38,8 +37,6 @@ export async function generateMetadata({ params }: { params: Promise<{ roomId: s
           description,
         },
       }
-    } else {
-      console.log('Room not found for roomId:', roomId)
     }
   } catch (error) {
     console.error('메타데이터 생성 중 오류:', error)
