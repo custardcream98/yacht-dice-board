@@ -1,4 +1,3 @@
-import { ScoreCard, ScoreCategory } from '@/types/game'
 import {
   UPPER_BONUS_THRESHOLD,
   UPPER_BONUS_SCORE,
@@ -6,6 +5,7 @@ import {
   LOWER_SECTION_CATEGORIES,
   FIXED_SCORE_CATEGORIES,
 } from '@/constants/game'
+import { ScoreCard, ScoreCategory } from '@/types/game'
 
 // 주사위 점수 계산 함수들
 export class YachtDiceCalculator {

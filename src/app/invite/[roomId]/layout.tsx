@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+
 import { adminDb } from '@/lib/firebase-admin'
 
 const DEFAULT_METADATA = {

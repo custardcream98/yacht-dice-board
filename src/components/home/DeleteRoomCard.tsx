@@ -1,11 +1,12 @@
 'use client'
 
-import { useId, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Trash2, AlertTriangle } from 'lucide-react'
+import { useId, useState } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import { useGameRoomActions } from '@/hooks'
 
 export function DeleteRoomCard() {
@@ -44,9 +45,9 @@ export function DeleteRoomCard() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <Dialog onOpenChange={setIsDeleteDialogOpen} open={isDeleteDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="destructive" className="w-full">
+            <Button className="w-full" variant="destructive">
               <Trash2 className="h-4 w-4 mr-2" />방 삭제하기
             </Button>
           </DialogTrigger>
@@ -74,14 +75,14 @@ export function DeleteRoomCard() {
               </div>
               <div className="flex gap-2">
                 <Button
-                  variant="destructive"
-                  onClick={handleDeleteRoom}
-                  disabled={isDeleting || !roomId}
                   className="flex-1"
+                  disabled={isDeleting || !roomId}
+                  onClick={handleDeleteRoom}
+                  variant="destructive"
                 >
                   {isDeleting ? '삭제 중...' : '영구 삭제'}
                 </Button>
-                <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} disabled={isDeleting}>
+                <Button disabled={isDeleting} onClick={() => setIsDeleteDialogOpen(false)} variant="outline">
                   취소
                 </Button>
               </div>
@@ -104,15 +105,15 @@ const RoomIdInput = ({
 
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium mb-2">
+      <label className="block text-sm font-medium mb-2" htmlFor={id}>
         삭제할 방 ID
       </label>
       <Input
+        className="font-mono"
         id={id}
-        value={deleteRoomId}
         onChange={e => onRoomIdChange(e.currentTarget.value)}
         placeholder="방 ID를 입력하세요"
-        className="font-mono"
+        value={deleteRoomId}
       />
     </div>
   )

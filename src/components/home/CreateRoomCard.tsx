@@ -1,11 +1,12 @@
 'use client'
 
-import { useId, useState, useTransition } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Plus, GamepadIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useId, useState, useTransition } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { useGameRoomActions } from '@/hooks'
 
 export function CreateRoomCard() {
@@ -46,11 +47,11 @@ export function CreateRoomCard() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <RoomNameInput roomName={roomName} onRoomNameChange={setRoomName} />
+        <RoomNameInput onRoomNameChange={setRoomName} roomName={roomName} />
         <Button
-          onClick={handleCreateRoom}
           className="w-full h-12 text-lg font-bold"
           disabled={isCreating || isRouterPushPending || !trimmedRoomName}
+          onClick={handleCreateRoom}
         >
           <GamepadIcon className="h-5 w-5 mr-2" />
           {isCreating || isRouterPushPending ? '방 생성 중...' : '방 만들고 시작하기'}
@@ -71,15 +72,15 @@ const RoomNameInput = ({
 
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium mb-2">
+      <label className="block text-sm font-medium mb-2" htmlFor={id}>
         방 이름
       </label>
       <Input
         id={id}
-        value={roomName}
+        maxLength={20}
         onChange={e => onRoomNameChange(e.currentTarget.value)}
         placeholder="방 이름을 입력하세요"
-        maxLength={20}
+        value={roomName}
       />
     </div>
   )

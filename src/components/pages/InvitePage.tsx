@@ -1,15 +1,16 @@
 'use client'
 
-import { useId, useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { UserPlus, Monitor, Users, Dice6, ArrowLeft, GamepadIcon } from 'lucide-react'
-import { useGameRoomData, useGameRoomActions } from '@/hooks'
-import { QRCodeShareButton } from '@/components/game'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useId, useState, useTransition } from 'react'
+
+import { QRCodeShareButton } from '@/components/game'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { useGameRoomData, useGameRoomActions } from '@/hooks'
 
 interface InvitePageProps {
   roomId: string
@@ -74,7 +75,7 @@ export default function InvitePage({ roomId }: InvitePageProps) {
               <h2 className="text-xl font-bold mb-2">게임방을 찾을 수 없습니다</h2>
               <p className="text-sm">{error || '방 ID를 확인하고 다시 시도해주세요.'}</p>
             </div>
-            <Button onClick={() => router.push('/')} className="w-full mt-4" variant="outline">
+            <Button className="w-full mt-4" onClick={() => router.push('/')} variant="outline">
               <ArrowLeft className="h-4 w-4 mr-2" />
               홈으로 돌아가기
             </Button>
@@ -107,7 +108,7 @@ export default function InvitePage({ roomId }: InvitePageProps) {
               <div>
                 <h2 className="text-xl font-bold text-blue-800 mb-1">{gameRoom.name}</h2>
                 <div className="flex items-center justify-center gap-2">
-                  <Badge variant={gameRoom.status === 'playing' ? 'default' : 'secondary'} className="px-3 py-1">
+                  <Badge className="px-3 py-1" variant={gameRoom.status === 'playing' ? 'default' : 'secondary'}>
                     {gameRoom.status === 'waiting' && '대기 중'}
                     {gameRoom.status === 'playing' && '게임 진행 중'}
                     {gameRoom.status === 'finished' && '게임 종료'}
@@ -123,7 +124,7 @@ export default function InvitePage({ roomId }: InvitePageProps) {
                   </div>
                   <div className="flex flex-wrap gap-1 justify-center">
                     {gameRoom.players.map(player => (
-                      <Badge key={player.id} variant="outline" className="text-xs">
+                      <Badge className="text-xs" key={player.id} variant="outline">
                         {player.name}
                       </Badge>
                     ))}
@@ -148,25 +149,25 @@ export default function InvitePage({ roomId }: InvitePageProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <form id={nameFormId} onSubmit={handleJoinRoom}>
-              <label htmlFor="playerName" className="block text-sm font-medium mb-2">
+              <label className="block text-sm font-medium mb-2" htmlFor="playerName">
                 {gameRoom.players.length === 0 ? '방장 이름' : '플레이어 이름'}
               </label>
               <Input
+                className="text-center text-lg font-medium"
+                disabled={isJoining}
                 id="playerName"
-                value={playerName}
+                maxLength={20}
                 onChange={e => setPlayerName(e.target.value)}
                 placeholder={gameRoom.players.length === 0 ? '방장 이름을 입력하세요' : '이름을 입력하세요'}
-                className="text-center text-lg font-medium"
-                maxLength={20}
-                disabled={isJoining}
+                value={playerName}
               />
             </form>
 
             <Button
-              form={nameFormId}
-              type="submit"
               className="w-full h-12 text-lg font-bold"
               disabled={isJoining || isRouterPushPending || !name}
+              form={nameFormId}
+              type="submit"
             >
               <Users className="h-5 w-5 mr-2" />
               {isJoining || isRouterPushPending
@@ -186,7 +187,7 @@ export default function InvitePage({ roomId }: InvitePageProps) {
               <div className="text-sm text-gray-600">
                 {gameRoom.players.length === 0 ? '친구들을 초대하세요!' : '더 많은 친구들을 초대하고 싶다면'}
               </div>
-              <QRCodeShareButton roomId={roomId} className="w-full h-12 text-lg font-bold" />
+              <QRCodeShareButton className="w-full h-12 text-lg font-bold" roomId={roomId} />
             </div>
 
             <div className="border-t border-gray-200"></div>
@@ -194,7 +195,7 @@ export default function InvitePage({ roomId }: InvitePageProps) {
             {/* 전광판 바로가기 */}
             <div className="text-center space-y-3">
               <div className="text-sm text-gray-600">게임에 참여하지 않고 점수만 확인하고 싶다면</div>
-              <Button asChild variant="outline" className="w-full h-12 text-lg font-bold">
+              <Button asChild className="w-full h-12 text-lg font-bold" variant="outline">
                 <Link href={`/board/${roomId}`}>
                   <Monitor className="h-5 w-5 mr-2" />
                   전광판으로 이동하기
@@ -207,7 +208,7 @@ export default function InvitePage({ roomId }: InvitePageProps) {
         {/* 하단 정보 */}
         <div className="text-center text-sm text-gray-500 space-y-1">
           <p>친구들과 함께 Yacht Dice를 즐겨보세요!</p>
-          <Button asChild variant="ghost" size="sm" className="text-gray-500 hover:text-gray-700">
+          <Button asChild className="text-gray-500 hover:text-gray-700" size="sm" variant="ghost">
             <Link href="/">
               <ArrowLeft className="h-3 w-3 mr-1" />
               홈으로 돌아가기

@@ -9,30 +9,30 @@ export interface Player {
 export interface ScoreCard {
   // 상위 섹션 (1-6)
   ace?: number
+  choice?: number
   dual?: number
-  triple?: number
-  quad?: number
-  penta?: number
+  fullHouse?: number
   hexa?: number
+  largeStraight?: number
 
+  penta?: number
   // 하위 섹션
   poker?: number
-  fullHouse?: number
+  quad?: number
   smallStraight?: number
-  largeStraight?: number
+  triple?: number
   yacht?: number
-  choice?: number
 }
 
 export interface GameRoom {
-  id: string
-  name: string
-  players: Player[]
+  createdAt: number
   currentPlayerIndex: number
   currentRound: number
+  id: string
   maxRounds: number
-  status: 'waiting' | 'playing' | 'finished'
-  createdAt: number
+  name: string
+  players: Player[]
+  status: 'finished' | 'playing' | 'waiting'
   updatedAt: number
 }
 
@@ -46,6 +46,6 @@ export type ScoreCategory = keyof ScoreCard
 // 점수 계산 결과
 export interface ScoreCalculation {
   category: ScoreCategory
-  score: number
   isValid: boolean
+  score: number
 }

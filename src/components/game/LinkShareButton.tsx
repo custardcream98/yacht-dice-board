@@ -1,14 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { Check, Copy } from 'lucide-react'
+import { useState } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 interface LinkShareButtonProps {
-  url: string
-  label: string
   icon: React.ComponentType<{ className?: string }>
+  label: string
+  url: string
 }
 
 export function LinkShareButton({ url, label, icon: Icon }: LinkShareButtonProps) {
@@ -39,12 +40,12 @@ export function LinkShareButton({ url, label, icon: Icon }: LinkShareButtonProps
         <span className="text-sm font-medium">{label}</span>
       </div>
       <div className="flex gap-2">
-        <Input value={url} readOnly className="text-xs font-mono" onClick={e => e.currentTarget.select()} />
+        <Input className="text-xs font-mono" onClick={e => e.currentTarget.select()} readOnly value={url} />
         <Button
-          onClick={copyToClipboard}
-          variant={copied ? 'secondary' : 'outline'}
-          size="sm"
           className="flex-shrink-0"
+          onClick={copyToClipboard}
+          size="sm"
+          variant={copied ? 'secondary' : 'outline'}
         >
           {copied ? (
             <>

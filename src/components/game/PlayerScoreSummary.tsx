@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Trophy, Users, Crown } from 'lucide-react'
+import { useState } from 'react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { YachtDiceCalculator } from '@/lib/yacht-dice-rules'
 import { Player, GameRoom } from '@/types/game'
 
@@ -53,11 +54,11 @@ export function PlayerScoreSummary({ gameRoom, myPlayer }: PlayerScoreSummaryPro
 
             return (
               <Button
-                key={player.id}
-                variant={isSelected ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedPlayerId(player.id)}
                 className={`flex-shrink-0 relative ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
+                key={player.id}
+                onClick={() => setSelectedPlayerId(player.id)}
+                size="sm"
+                variant={isSelected ? 'default' : 'outline'}
               >
                 <div className="flex items-center gap-2">
                   {/* 순위 표시 */}
@@ -84,7 +85,7 @@ export function PlayerScoreSummary({ gameRoom, myPlayer }: PlayerScoreSummaryPro
             <div className="flex items-center gap-2">
               <h3 className="font-bold text-lg">{selectedPlayer.name}</h3>
               {selectedPlayer.id === myPlayer.id && (
-                <Badge variant="outline" className="text-xs">
+                <Badge className="text-xs" variant="outline">
                   나
                 </Badge>
               )}
@@ -151,7 +152,7 @@ export function PlayerScoreSummary({ gameRoom, myPlayer }: PlayerScoreSummaryPro
           </div>
           <div className="grid grid-cols-1 gap-1 text-sm">
             {rankings.slice(0, 3).map((player, index) => (
-              <div key={player.id} className="flex items-center justify-between">
+              <div className="flex items-center justify-between" key={player.id}>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-xs text-gray-500">
                     {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}

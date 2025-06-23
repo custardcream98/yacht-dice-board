@@ -1,5 +1,5 @@
+export { AppFooter } from './AppFooter'
 export { AppHeader } from './AppHeader'
 export { CreateRoomCard } from './CreateRoomCard'
-export { JoinRoomCard } from './JoinRoomCard'
 export { DeleteRoomCard } from './DeleteRoomCard'
-export { AppFooter } from './AppFooter'
+export { JoinRoomCard } from './JoinRoomCard'

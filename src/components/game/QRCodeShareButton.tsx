@@ -1,14 +1,15 @@
 'use client'
 
+import { QrCode, Copy, Check } from 'lucide-react'
+import { QRCodeSVG } from 'qrcode.react'
 import { useState } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { QRCodeSVG } from 'qrcode.react'
-import { QrCode, Copy, Check } from 'lucide-react'
 
 interface QRCodeShareButtonProps {
-  roomId: string
   className?: string
+  roomId: string
 }
 
 export function QRCodeShareButton({ roomId, className }: QRCodeShareButtonProps) {
@@ -39,9 +40,9 @@ export function QRCodeShareButton({ roomId, className }: QRCodeShareButtonProps)
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog onOpenChange={setIsOpen} open={isOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className={className}>
+        <Button className={className} size="sm" variant="outline">
           <QrCode className="h-4 w-4 mr-2" />
           QR 코드
         </Button>
@@ -57,7 +58,7 @@ export function QRCodeShareButton({ roomId, className }: QRCodeShareButtonProps)
         <div className="space-y-4">
           {/* QR 코드 */}
           <div className="flex justify-center p-4 bg-white rounded-lg border">
-            <QRCodeSVG value={inviteUrl} size={200} level="M" marginSize={0} bgColor="#ffffff" fgColor="#000000" />
+            <QRCodeSVG bgColor="#ffffff" fgColor="#000000" level="M" marginSize={0} size={200} value={inviteUrl} />
           </div>
 
           {/* 설명 텍스트 */}
@@ -72,10 +73,10 @@ export function QRCodeShareButton({ roomId, className }: QRCodeShareButtonProps)
             <div className="flex gap-2">
               <div className="flex-1 p-2 bg-gray-50 rounded text-xs font-mono break-all">{inviteUrl}</div>
               <Button
-                onClick={copyToClipboard}
-                variant={copied ? 'secondary' : 'outline'}
-                size="sm"
                 className="flex-shrink-0"
+                onClick={copyToClipboard}
+                size="sm"
+                variant={copied ? 'secondary' : 'outline'}
               >
                 {copied ? (
                   <>
@@ -94,7 +95,7 @@ export function QRCodeShareButton({ roomId, className }: QRCodeShareButtonProps)
 
           {/* 액션 버튼 */}
           <div className="pt-2">
-            <Button onClick={() => setIsOpen(false)} variant="secondary" className="w-full">
+            <Button className="w-full" onClick={() => setIsOpen(false)} variant="secondary">
               닫기
             </Button>
           </div>

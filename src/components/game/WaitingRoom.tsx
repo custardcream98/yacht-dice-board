@@ -1,9 +1,10 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { PlayCircle } from 'lucide-react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { GameRoom, Player } from '@/types/game'
 
 interface WaitingRoomProps {
@@ -26,7 +27,7 @@ export function WaitingRoom({ gameRoom, myPlayer, onStartGame }: WaitingRoomProp
           <h3 className="font-bold mb-2">참가자 ({gameRoom.players.length}명)</h3>
           <div className="space-y-2">
             {gameRoom.players.map((player, index) => (
-              <div key={player.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg" key={player.id}>
                 <span className="font-medium">
                   {player.name}
                   {player.id === myPlayer.id && ' (나)'}
@@ -37,7 +38,7 @@ export function WaitingRoom({ gameRoom, myPlayer, onStartGame }: WaitingRoomProp
             ))}
           </div>
         </div>
-        <Button onClick={onStartGame} className="w-full h-12 text-lg font-bold">
+        <Button className="w-full h-12 text-lg font-bold" onClick={onStartGame}>
           <PlayCircle className="h-5 w-5 mr-2" />
           게임 시작하기
         </Button>

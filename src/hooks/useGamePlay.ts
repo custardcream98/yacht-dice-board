@@ -1,5 +1,6 @@
-import { useState } from 'react'
 import { doc, updateDoc, getDoc } from 'firebase/firestore'
+import { useState } from 'react'
+
 import { db } from '@/lib/firebase'
 import { GameRoom, Player, ScoreCategory } from '@/types/game'
 
@@ -18,7 +19,7 @@ const shufflePlayers = (players: Player[]) => {
  */
 export function useGamePlay() {
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<null | string>(null)
 
   // 게임 시작
   const startGame = async (roomId: string): Promise<void> => {

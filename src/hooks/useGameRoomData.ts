@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
 import { doc, onSnapshot } from 'firebase/firestore'
+import { useState, useEffect } from 'react'
+
 import { db } from '@/lib/firebase'
 import { GameRoom } from '@/types/game'
 
@@ -10,7 +11,7 @@ import { GameRoom } from '@/types/game'
 export function useGameRoomData(roomId?: string) {
   const [gameRoom, setGameRoom] = useState<GameRoom | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<null | string>(null)
 
   useEffect(() => {
     if (!roomId) {

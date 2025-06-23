@@ -1,13 +1,14 @@
 'use client'
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Crown, Trophy, Medal, Target, TrendingUp, RotateCcw, AlertTriangle } from 'lucide-react'
-import { GameRoom, Player } from '@/types/game'
-import { YachtDiceCalculator } from '@/lib/yacht-dice-rules'
 import Link from 'next/link'
+import { useState } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { YachtDiceCalculator } from '@/lib/yacht-dice-rules'
+import { GameRoom, Player } from '@/types/game'
 
 interface GameFinishedProps {
   gameRoom: GameRoom
@@ -170,9 +171,9 @@ export function GameFinished({ gameRoom, myPlayer, onRestartGame }: GameFinished
                 </Link>
               </Button>
 
-              <Dialog open={isRestartDialogOpen} onOpenChange={setIsRestartDialogOpen}>
+              <Dialog onOpenChange={setIsRestartDialogOpen} open={isRestartDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full h-12 text-lg font-bold">
+                  <Button className="w-full h-12 text-lg font-bold" variant="outline">
                     <RotateCcw className="h-5 w-5 mr-2" />새 게임 시작하기
                   </Button>
                 </DialogTrigger>
@@ -191,10 +192,10 @@ export function GameFinished({ gameRoom, myPlayer, onRestartGame }: GameFinished
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" onClick={() => setIsRestartDialogOpen(false)} className="flex-1">
+                      <Button className="flex-1" onClick={() => setIsRestartDialogOpen(false)} variant="outline">
                         취소
                       </Button>
-                      <Button onClick={handleRestartGame} className="flex-1">
+                      <Button className="flex-1" onClick={handleRestartGame}>
                         <RotateCcw className="h-4 w-4 mr-2" />새 게임 시작
                       </Button>
                     </div>

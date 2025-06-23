@@ -1,17 +1,18 @@
 'use client'
 
+import { Trophy, Users, Crown, Dice6, Maximize, Minimize } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+
+import { QRCodeShareButton } from '@/components/game'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { YachtDiceCalculator, CATEGORY_NAMES } from '@/lib/yacht-dice-rules'
-import { Player } from '@/types/game'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { SCORE_CATEGORIES, UPPER_SECTION_CATEGORIES } from '@/constants/game'
-import { Trophy, Users, Crown, Dice6, Maximize, Minimize } from 'lucide-react'
 import { useGameRoomData } from '@/hooks'
 import { cn } from '@/lib/utils'
-import { QRCodeShareButton } from '@/components/game'
+import { YachtDiceCalculator, CATEGORY_NAMES } from '@/lib/yacht-dice-rules'
+import { Player } from '@/types/game'
 
 export default function GameBoardPage({ roomId }: { roomId: string }) {
   const { gameRoom, loading, error } = useGameRoomData(roomId)
@@ -95,13 +96,13 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
       <div className="fixed top-4 right-4 z-50 flex gap-2">
         {/* QR 코드 공유 버튼 */}
         {gameRoom.status === 'waiting' && (
-          <QRCodeShareButton roomId={roomId} className="bg-white/20 hover:bg-white/30 text-white border-white/30" />
+          <QRCodeShareButton className="bg-white/20 hover:bg-white/30 text-white border-white/30" roomId={roomId} />
         )}
 
         {/* 전체화면 토글 버튼 */}
         <Button
-          onClick={toggleFullscreen}
           className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+          onClick={toggleFullscreen}
           size="sm"
           variant="outline"
         >
@@ -130,7 +131,7 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
           </div>
           <div className="flex items-center justify-center gap-6 text-white text-sm">
             <div className="flex items-center gap-2">
-              <Badge variant={gameRoom.status === 'playing' ? 'default' : 'secondary'} className="px-3 py-1">
+              <Badge className="px-3 py-1" variant={gameRoom.status === 'playing' ? 'default' : 'secondary'}>
                 {gameRoom.status === 'waiting' && '대기 중'}
                 {gameRoom.status === 'playing' && '게임 진행 중'}
                 {gameRoom.status === 'finished' && '게임 종료'}
@@ -181,7 +182,6 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
               <div className={`grid grid-cols-1 md:grid-cols-3 ${isFullscreen ? 'gap-3' : 'gap-3'}`}>
                 {rankings.slice(0, 3).map((player, index) => (
                   <div
-                    key={player.id}
                     className={cn(
                       `text-center rounded-lg`,
                       isFullscreen ? 'p-4' : 'p-3',
@@ -191,6 +191,7 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
                           ? 'bg-gray-100 border-2 border-gray-300'
                           : 'bg-orange-100 border-2 border-orange-300',
                     )}
+                    key={player.id}
                   >
                     <div className={isFullscreen ? 'text-3xl mb-2' : 'text-2xl mb-1'}>
                       {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
@@ -215,7 +216,7 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
                   <TableRow className="bg-slate-50">
                     <TableHead />
                     {gameRoom.players.map(player => (
-                      <TableHead key={player.id} className={`text-center ${isFullscreen ? 'min-w-32' : 'min-w-24'}`}>
+                      <TableHead className={`text-center ${isFullscreen ? 'min-w-32' : 'min-w-24'}`} key={player.id}>
                         <div className="space-y-1">
                           <div className={`font-bold ${isFullscreen ? 'text-lg' : 'text-base'}`}>{player.name}</div>
                           {gameRoom.status === 'playing' &&
@@ -233,12 +234,12 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
                 <TableBody>
                   {/* 상위 섹션 */}
                   {UPPER_SECTION_CATEGORIES.map(category => (
-                    <TableRow key={category} className="hover:bg-gray-50">
+                    <TableRow className="hover:bg-gray-50" key={category}>
                       <TableCell className={`font-bold ${isFullscreen ? 'text-base py-2' : 'text-sm py-2'}`}>
                         {CATEGORY_NAMES[category]}
                       </TableCell>
                       {gameRoom.players.map(player => (
-                        <TableCell key={player.id} className={`text-center ${isFullscreen ? 'py-2' : 'py-2'}`}>
+                        <TableCell className={`text-center ${isFullscreen ? 'py-2' : 'py-2'}`} key={player.id}>
                           <div className={`font-mono font-bold ${isFullscreen ? 'text-xl' : 'text-lg'}`}>
                             {player.scores[category] !== undefined ? player.scores[category] : '-'}
                           </div>
@@ -253,7 +254,7 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
                       상위 섹션 총점
                     </TableCell>
                     {gameRoom.players.map(player => (
-                      <TableCell key={player.id} className="text-center py-2">
+                      <TableCell className="text-center py-2" key={player.id}>
                         <div className={cn('font-mono font-bold', isFullscreen ? 'text-xl' : 'text-lg')}>
                           {calculateUpperSectionTotal(player)}
                         </div>
@@ -267,7 +268,7 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
                       보너스
                     </TableCell>
                     {gameRoom.players.map(player => (
-                      <TableCell key={player.id} className="text-center">
+                      <TableCell className="text-center" key={player.id}>
                         <div className={cn(`font-mono font-bold text-blue-600`, isFullscreen ? 'text-xl' : 'text-lg')}>
                           {calculateUpperBonus(player)}
                         </div>
@@ -277,12 +278,12 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
 
                   {/* 하위 섹션 */}
                   {SCORE_CATEGORIES.slice(6).map(category => (
-                    <TableRow key={category} className="hover:bg-gray-50">
+                    <TableRow className="hover:bg-gray-50" key={category}>
                       <TableCell className={cn(`font-bold`, isFullscreen ? 'text-base py-2' : 'text-sm py-2')}>
                         {CATEGORY_NAMES[category]}
                       </TableCell>
                       {gameRoom.players.map(player => (
-                        <TableCell key={player.id} className="text-center">
+                        <TableCell className="text-center" key={player.id}>
                           <div className={cn(`font-mono font-bold`, isFullscreen ? 'text-xl' : 'text-lg')}>
                             {player.scores[category] !== undefined ? player.scores[category] : '-'}
                           </div>
@@ -299,7 +300,7 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
                       총점
                     </TableCell>
                     {gameRoom.players.map(player => (
-                      <TableCell key={player.id} className="text-center">
+                      <TableCell className="text-center" key={player.id}>
                         <div
                           className={cn(`font-mono font-bold text-yellow-700`, isFullscreen ? 'text-3xl' : 'text-2xl')}
                         >

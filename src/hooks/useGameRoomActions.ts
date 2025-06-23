@@ -1,8 +1,9 @@
-import { useState } from 'react'
 import { collection, doc, addDoc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore'
+import { useState } from 'react'
+
+import { MAX_ROUNDS } from '@/constants/game'
 import { db } from '@/lib/firebase'
 import { GameRoom, Player } from '@/types/game'
-import { MAX_ROUNDS } from '@/constants/game'
 
 /**
  * 게임방 생성, 참여, 삭제 등의 액션을 담당하는 훅
@@ -10,7 +11,7 @@ import { MAX_ROUNDS } from '@/constants/game'
  */
 export function useGameRoomActions() {
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<null | string>(null)
 
   // 방 생성
   const createRoom = async (roomName: string): Promise<string> => {

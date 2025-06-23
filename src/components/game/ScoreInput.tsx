@@ -1,15 +1,16 @@
 'use client'
 
+import { Calculator, Lock, Target, Plus, Minus, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6 } from 'lucide-react'
 import { useState, useCallback } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { UPPER_SECTION_CATEGORIES, LOWER_SECTION_CATEGORIES, UPPER_SECTION_DICE_COUNT } from '@/constants/game'
 import { YachtDiceCalculator, CATEGORY_NAMES } from '@/lib/yacht-dice-rules'
 import { ScoreCategory, Player } from '@/types/game'
-import { UPPER_SECTION_CATEGORIES, LOWER_SECTION_CATEGORIES, UPPER_SECTION_DICE_COUNT } from '@/constants/game'
-import { Calculator, Lock, Target, Plus, Minus, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6 } from 'lucide-react'
 
 const DiceIcon = ({ value }: { value: number }) => {
   const icons = [Dice1, Dice2, Dice3, Dice4, Dice5, Dice6]
@@ -19,8 +20,8 @@ const DiceIcon = ({ value }: { value: number }) => {
 
 interface MobileScoreInputProps {
   category: ScoreCategory
-  onScoreSubmit: (category: ScoreCategory, score: number) => void
   onClose?: () => void
+  onScoreSubmit: (category: ScoreCategory, score: number) => void
 }
 
 type Dice = [number, number, number, number, number]
@@ -62,16 +63,16 @@ function ScoreInputContents({ category, onScoreSubmit, onClose }: MobileScoreInp
       {/* 입력 모드 선택 */}
       <div className="flex gap-2 mb-4">
         <Button
-          variant={inputMode === 'dice' ? 'default' : 'outline'}
-          onClick={() => setInputMode('dice')}
           className="flex-1 text-xs sm:text-sm"
+          onClick={() => setInputMode('dice')}
+          variant={inputMode === 'dice' ? 'default' : 'outline'}
         >
           🎲 주사위 입력
         </Button>
         <Button
-          variant={inputMode === 'manual' ? 'default' : 'outline'}
-          onClick={() => setInputMode('manual')}
           className="flex-1 text-xs sm:text-sm"
+          onClick={() => setInputMode('manual')}
+          variant={inputMode === 'manual' ? 'default' : 'outline'}
         >
           ✏️ 직접 입력
         </Button>
@@ -82,14 +83,14 @@ function ScoreInputContents({ category, onScoreSubmit, onClose }: MobileScoreInp
           {/* 주사위 입력 */}
           <div className="grid grid-cols-5 gap-2">
             {dice.map((value, index) => (
-              <div key={index} className="text-center">
+              <div className="text-center" key={index}>
                 <div className="flex flex-col gap-1">
                   <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => incrementDice(index)}
                     className="h-8 w-full p-0"
                     disabled={value >= 6}
+                    onClick={() => incrementDice(index)}
+                    size="sm"
+                    variant="outline"
                   >
                     <Plus className="h-3 w-3" />
                   </Button>
@@ -97,11 +98,11 @@ function ScoreInputContents({ category, onScoreSubmit, onClose }: MobileScoreInp
                     <DiceIcon value={value} />
                   </div>
                   <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => decrementDice(index)}
                     className="h-8 w-full p-0"
                     disabled={value <= 1}
+                    onClick={() => decrementDice(index)}
+                    size="sm"
+                    variant="outline"
                   >
                     <Minus className="h-3 w-3" />
                   </Button>
@@ -123,12 +124,12 @@ function ScoreInputContents({ category, onScoreSubmit, onClose }: MobileScoreInp
           <div>
             <label className="block text-sm font-medium mb-2">점수 직접 입력</label>
             <Input
-              type="number"
-              value={manualScore}
-              onChange={e => setManualScore(e.target.value)}
-              placeholder="점수를 입력하세요"
               className="text-lg text-center"
               min="0"
+              onChange={e => setManualScore(e.target.value)}
+              placeholder="점수를 입력하세요"
+              type="number"
+              value={manualScore}
             />
           </div>
 
@@ -141,9 +142,9 @@ function ScoreInputContents({ category, onScoreSubmit, onClose }: MobileScoreInp
 
       {/* 제출 버튼 */}
       <Button
-        onClick={handleSubmit}
         className="w-full h-12 text-lg font-bold"
         disabled={inputMode === 'manual' && !manualScore}
+        onClick={handleSubmit}
       >
         <Target className="h-5 w-5 mr-2" />
         점수 제출하기
@@ -153,13 +154,13 @@ function ScoreInputContents({ category, onScoreSubmit, onClose }: MobileScoreInp
 }
 
 interface ScoreInputProps {
-  myPlayer: Player
   isMyTurn: boolean
+  myPlayer: Player
   onScoreSubmit: (category: ScoreCategory, score: number) => void
 }
 
 export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProps) {
-  const [openDialog, setOpenDialog] = useState<ScoreCategory | null>(null)
+  const [openDialog, setOpenDialog] = useState<null | ScoreCategory>(null)
 
   const handleScoreSubmit = (category: ScoreCategory, score: number) => {
     onScoreSubmit(category, score)
@@ -173,7 +174,7 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
           <Calculator className="h-5 w-5" />
           점수 입력
           {!isMyTurn && (
-            <Badge variant="secondary" className="ml-auto text-xs">
+            <Badge className="ml-auto text-xs" variant="secondary">
               <Lock className="h-3 w-3 mr-1" />
               대기 중
             </Badge>
@@ -193,12 +194,11 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
               return (
                 <Dialog
                   key={category}
-                  open={openDialog === category}
                   onOpenChange={close => !close && setOpenDialog(null)}
+                  open={openDialog === category}
                 >
                   <DialogTrigger asChild>
                     <Button
-                      variant={isScored ? 'secondary' : 'outline'}
                       className={`h-16 flex flex-col items-center justify-center p-2 relative overflow-hidden ${
                         isWaitingTurn
                           ? 'opacity-50 cursor-not-allowed'
@@ -208,6 +208,7 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
                       }`}
                       disabled={isWaitingTurn}
                       onClick={() => !isScored && setOpenDialog(category)}
+                      variant={isScored ? 'secondary' : 'outline'}
                     >
                       {isScored && (
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 to-blue-100/40 pointer-events-none" />
@@ -237,8 +238,8 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
                     </DialogHeader>
                     <ScoreInputContents
                       category={category}
-                      onScoreSubmit={handleScoreSubmit}
                       onClose={() => setOpenDialog(null)}
+                      onScoreSubmit={handleScoreSubmit}
                     />
                   </DialogContent>
                 </Dialog>
@@ -259,12 +260,11 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
               return (
                 <Dialog
                   key={category}
-                  open={openDialog === category}
                   onOpenChange={close => !close && setOpenDialog(null)}
+                  open={openDialog === category}
                 >
                   <DialogTrigger asChild>
                     <Button
-                      variant={isScored ? 'secondary' : 'outline'}
                       className={`h-16 flex items-center justify-between p-4 relative overflow-hidden ${
                         isWaitingTurn
                           ? 'opacity-50 cursor-not-allowed'
@@ -274,6 +274,7 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
                       }`}
                       disabled={isWaitingTurn}
                       onClick={() => !isScored && setOpenDialog(category)}
+                      variant={isScored ? 'secondary' : 'outline'}
                     >
                       {isScored && (
                         <div className="absolute inset-0 bg-gradient-to-br from-green-50/40 to-green-100/40 pointer-events-none" />
@@ -297,8 +298,8 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
                     </DialogHeader>
                     <ScoreInputContents
                       category={category}
-                      onScoreSubmit={handleScoreSubmit}
                       onClose={() => setOpenDialog(null)}
+                      onScoreSubmit={handleScoreSubmit}
                     />
                   </DialogContent>
                 </Dialog>

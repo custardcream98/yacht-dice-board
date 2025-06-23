@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+
 import { adminDb } from '@/lib/firebase-admin'
 
 // 동적 메타데이터 생성

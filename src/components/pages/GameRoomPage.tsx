@@ -1,13 +1,13 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { ScoreCategory } from '@/types/game'
 import { Dice6, ArrowLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 import { GameHeader, WaitingRoom, ScoreInput, PlayerScoreSummary, GameFinished } from '@/components/game'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { useGamePlay, useGameRoomActions, useGameRoomData } from '@/hooks'
+import { ScoreCategory } from '@/types/game'
 
 export default function GameRoomPage({ roomId, playerName }: { roomId: string; playerName: string }) {
   const router = useRouter()
@@ -80,7 +80,7 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
           <CardContent className="text-center p-8">
             <p className="text-red-600 mb-4">{error || '게임방을 찾을 수 없습니다.'}</p>
             <p className="text-sm text-gray-600">방 ID를 확인하고 다시 시도해주세요.</p>
-            <Button onClick={() => router.push('/')} className="mt-4 w-full" variant="outline">
+            <Button className="mt-4 w-full" onClick={() => router.push('/')} variant="outline">
               <ArrowLeft className="h-4 w-4 mr-2" />
               홈으로 돌아가기
             </Button>
@@ -104,7 +104,7 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
               <p className="text-xs text-gray-500">현재 참가자:</p>
               <p className="text-sm font-medium">{gameRoom.players.map(p => p.name).join(', ')}</p>
             </div>
-            <Button onClick={() => router.push('/')} className="w-full" variant="outline">
+            <Button className="w-full" onClick={() => router.push('/')} variant="outline">
               <ArrowLeft className="h-4 w-4 mr-2" />
               홈으로 돌아가기
             </Button>
@@ -118,10 +118,10 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* 헤더 */}
       <GameHeader
-        gameRoom={gameRoom}
-        myPlayer={myPlayer}
         currentPlayer={currentPlayer}
+        gameRoom={gameRoom}
         isMyTurn={!!isMyTurn}
+        myPlayer={myPlayer}
         onDeleteRoom={handleDeleteRoom}
       />
 
@@ -135,7 +135,7 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
         {gameRoom.status === 'playing' && (
           <>
             {/* 점수 입력 */}
-            <ScoreInput myPlayer={myPlayer} isMyTurn={!!isMyTurn} onScoreSubmit={handleScoreSubmit} />
+            <ScoreInput isMyTurn={!!isMyTurn} myPlayer={myPlayer} onScoreSubmit={handleScoreSubmit} />
 
             {/* 플레이어 점수 요약 */}
             <PlayerScoreSummary gameRoom={gameRoom} myPlayer={myPlayer} />

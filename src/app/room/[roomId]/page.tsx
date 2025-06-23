@@ -10,5 +10,5 @@ export default async function RoomPage({
   const { roomId } = await params
   const { player } = await searchParams
 
-  return <GameRoomPage roomId={roomId} playerName={player} />
+  return <GameRoomPage playerName={player} roomId={roomId} />
 }

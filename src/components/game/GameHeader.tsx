@@ -1,21 +1,23 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { LinkShareButton } from './LinkShareButton'
 import { ArrowLeft, Share2, Trash2, AlertTriangle, Users, ExternalLink, Monitor, UserPlus, Lock } from 'lucide-react'
-import { GameRoom, Player } from '@/types/game'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
+import { GameRoom, Player } from '@/types/game'
+
+import { LinkShareButton } from './LinkShareButton'
 
 interface GameHeaderProps {
-  gameRoom: GameRoom
-  myPlayer: Player
   currentPlayer?: Player
+  gameRoom: GameRoom
   isMyTurn?: boolean
+  myPlayer: Player
   onDeleteRoom: () => Promise<void>
 }
 
@@ -66,18 +68,18 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
         <div>
           <div className="flex items-center justify-between mb-3">
             <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push('/')}
               className="text-gray-600 hover:text-gray-900"
+              onClick={() => router.push('/')}
+              size="sm"
+              variant="ghost"
             >
               <ArrowLeft className="h-4 w-4 mr-1" />홈
             </Button>
             <div className="flex items-center gap-2">
               {/* 링크 공유 버튼 */}
-              <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+              <Dialog onOpenChange={setIsShareDialogOpen} open={isShareDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
+                  <Button size="sm" variant="outline">
                     <Share2 className="h-4 w-4 mr-1" />
                     공유
                   </Button>
@@ -90,21 +92,21 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
                     </DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
-                    <LinkShareButton url={inviteUrl} label="초대 링크" icon={UserPlus} />
+                    <LinkShareButton icon={UserPlus} label="초대 링크" url={inviteUrl} />
 
-                    <LinkShareButton url={boardUrl} label="전광판 링크" icon={Monitor} />
+                    <LinkShareButton icon={Monitor} label="전광판 링크" url={boardUrl} />
                     <div className="text-xs text-gray-500 bg-green-50 p-2 rounded">
                       📺 큰 화면에서 점수를 확인할 때 사용하세요.
                     </div>
 
                     <div className="flex gap-2 pt-2">
-                      <Button asChild variant="outline" className="flex-1">
-                        <Link href={boardUrl} target="_blank" rel="noopener noreferrer">
+                      <Button asChild className="flex-1" variant="outline">
+                        <Link href={boardUrl} rel="noopener noreferrer" target="_blank">
                           <ExternalLink className="h-4 w-4 mr-1" />
                           전광판 열기
                         </Link>
                       </Button>
-                      <Button onClick={() => setIsShareDialogOpen(false)} variant="secondary" className="flex-1">
+                      <Button className="flex-1" onClick={() => setIsShareDialogOpen(false)} variant="secondary">
                         닫기
                       </Button>
                     </div>
@@ -113,9 +115,9 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
               </Dialog>
 
               {/* 방 삭제 버튼 */}
-              <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+              <Dialog onOpenChange={setIsDeleteDialogOpen} open={isDeleteDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="destructive" size="sm">
+                  <Button size="sm" variant="destructive">
                     <Trash2 className="h-4 w-4 mr-1" />
                     삭제
                   </Button>
@@ -141,10 +143,10 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="destructive" onClick={handleDeleteRoom} disabled={isDeleting} className="flex-1">
+                      <Button className="flex-1" disabled={isDeleting} onClick={handleDeleteRoom} variant="destructive">
                         {isDeleting ? '삭제 중...' : '영구 삭제'}
                       </Button>
-                      <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} disabled={isDeleting}>
+                      <Button disabled={isDeleting} onClick={() => setIsDeleteDialogOpen(false)} variant="outline">
                         취소
                       </Button>
                     </div>
@@ -167,7 +169,7 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
 
           {/* 기본 게임 정보 */}
           <div className="flex items-center justify-center gap-2 sm:gap-4 text-xs sm:text-sm mb-2">
-            <Badge variant="outline" className="text-xs">
+            <Badge className="text-xs" variant="outline">
               나: {myPlayer.name}
             </Badge>
             {gameRoom.status === 'playing' && (
@@ -182,7 +184,7 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
             <div className="space-y-1">
               <div className="flex items-center justify-center gap-2">
                 <span className="text-xs text-gray-600">현재 차례:</span>
-                <Badge variant={isMyTurn ? 'outline' : 'secondary'} className="text-xs">
+                <Badge className="text-xs" variant={isMyTurn ? 'outline' : 'secondary'}>
                   {currentPlayer.name}
                   {isMyTurn && ' (나)'}
                 </Badge>
