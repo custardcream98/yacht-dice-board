@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { UPPER_SECTION_CATEGORIES, LOWER_SECTION_CATEGORIES, UPPER_SECTION_DICE_COUNT } from '@/constants/game'
+import { cn } from '@/lib/utils'
 import { YachtDiceCalculator, CATEGORY_NAMES } from '@/lib/yacht-dice-rules'
 import { ScoreCategory, Player, ExtendedRules } from '@/types/game'
 
@@ -167,13 +168,6 @@ interface ScoreInputProps {
 }
 
 export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProps) {
-  const [openDialog, setOpenDialog] = useState<null | ScoreCategory>(null)
-
-  const handleScoreSubmit = (category: ScoreCategory, score: number) => {
-    onScoreSubmit(category, score)
-    setOpenDialog(null) // 점수 제출 후 다이얼로그 닫기
-  }
-
   const visibleLowerCategories = useMemo(
     () =>
       LOWER_SECTION_CATEGORIES.filter(category => {
@@ -210,58 +204,43 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
               const isWaitingTurn = !isMyTurn
 
               return (
-                <Dialog
+                <UpperSectionDialog
+                  category={category}
+                  extendedRules={extendedRules}
                   key={category}
-                  onOpenChange={close => !close && setOpenDialog(null)}
-                  open={openDialog === category}
+                  onScoreSubmit={onScoreSubmit}
                 >
-                  <DialogTrigger asChild>
-                    <Button
-                      className={`h-16 flex flex-col items-center justify-center p-2 relative overflow-hidden ${
-                        isWaitingTurn
-                          ? 'opacity-50 cursor-not-allowed'
-                          : isScored
-                            ? 'cursor-not-allowed bg-gradient-to-br from-blue-100 to-blue-200 border-blue-300 shadow-md transform'
-                            : 'hover:bg-blue-50 hover:border-blue-300'
-                      }`}
-                      disabled={isWaitingTurn}
-                      onClick={() => !isScored && setOpenDialog(category)}
-                      variant={isScored ? 'secondary' : 'outline'}
-                    >
-                      {isScored && (
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 to-blue-100/40 pointer-events-none" />
-                      )}
-                      <div className="flex items-center gap-1 mb-1 relative z-10">
-                        <DiceIcon value={UPPER_SECTION_DICE_COUNT[category]} />
-                        <span className={`text-xs font-bold ${isScored ? 'text-blue-700' : ''}`}>
-                          {CATEGORY_NAMES[category]}
-                        </span>
-                      </div>
-                      <div className={`font-bold relative z-10 ${isScored ? 'text-blue-800 text-xl' : 'text-lg'}`}>
-                        {isScored ? `${score}점` : '-'}
-                      </div>
-                      {isWaitingTurn && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100/80 rounded">
-                          <Lock className="h-4 w-4 text-gray-400" />
-                        </div>
-                      )}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle className="flex items-center gap-2">
-                        <DiceIcon value={UPPER_SECTION_DICE_COUNT[category]} />
+                  <Button
+                    className={cn(
+                      'h-16 flex flex-col items-center justify-center p-2 relative overflow-hidden',
+                      isWaitingTurn
+                        ? 'opacity-50 cursor-not-allowed'
+                        : isScored
+                          ? 'cursor-not-allowed bg-gradient-to-br from-blue-100 to-blue-200 border-blue-300 shadow-md transform'
+                          : 'hover:bg-blue-50 hover:border-blue-300',
+                    )}
+                    disabled={isWaitingTurn}
+                    variant={isScored ? 'secondary' : 'outline'}
+                  >
+                    {isScored && (
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 to-blue-100/40 pointer-events-none" />
+                    )}
+                    <div className="flex items-center gap-1 mb-1 relative z-10">
+                      <DiceIcon value={UPPER_SECTION_DICE_COUNT[category]} />
+                      <span className={cn('text-xs font-bold', isScored && 'text-blue-700')}>
                         {CATEGORY_NAMES[category]}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <ScoreInputContents
-                      category={category}
-                      extendedRules={extendedRules}
-                      onClose={() => setOpenDialog(null)}
-                      onScoreSubmit={handleScoreSubmit}
-                    />
-                  </DialogContent>
-                </Dialog>
+                      </span>
+                    </div>
+                    <div className={cn('font-bold relative z-10', isScored ? 'text-blue-800 text-xl' : 'text-lg')}>
+                      {isScored ? `${score}점` : '-'}
+                    </div>
+                    {isWaitingTurn && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100/80 rounded">
+                        <Lock className="h-4 w-4 text-gray-400" />
+                      </div>
+                    )}
+                  </Button>
+                </UpperSectionDialog>
               )
             })}
           </div>
@@ -277,83 +256,134 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
               const isWaitingTurn = !isMyTurn
 
               return (
-                <Dialog
+                <LowerSectionDialog
+                  category={category}
+                  extendedRules={extendedRules}
                   key={category}
-                  onOpenChange={close => !close && setOpenDialog(null)}
-                  open={openDialog === category}
+                  onScoreSubmit={onScoreSubmit}
                 >
-                  <DialogTrigger asChild>
-                    <Button
-                      className={`h-16 flex items-center justify-between p-4 relative overflow-hidden ${
-                        isWaitingTurn
-                          ? 'opacity-50 cursor-not-allowed'
-                          : isScored
-                            ? 'cursor-not-allowed bg-gradient-to-br from-green-100 to-green-200 border-green-300 shadow-md transform'
-                            : 'hover:bg-green-50 hover:border-green-300'
-                      }`}
-                      disabled={isWaitingTurn}
-                      onClick={() => !isScored && setOpenDialog(category)}
-                      variant={isScored ? 'secondary' : 'outline'}
-                    >
-                      {isScored && (
-                        <div className="absolute inset-0 bg-gradient-to-br from-green-50/40 to-green-100/40 pointer-events-none" />
-                      )}
-                      <div className="flex items-center gap-2">
-                        <span className={`font-bold relative z-10 ${isScored ? 'text-green-700' : ''}`}>
-                          {CATEGORY_NAMES[category]}
-                        </span>
-                        {/* 확장 룰 표시 */}
-                        {category === 'threeOfAKind' && extendedRules.enableThreeOfAKind && (
-                          <Badge className="text-xs bg-orange-100 text-orange-800" variant="outline">
-                            확장
-                          </Badge>
-                        )}
-                        {category === 'fullHouse' && extendedRules.fullHouseFixedScore && (
-                          <Badge className="text-xs bg-orange-100 text-orange-800" variant="outline">
-                            고정 25점
-                          </Badge>
-                        )}
-                      </div>
-                      <span className={`font-bold relative z-10 ${isScored ? 'text-green-800 text-xl' : 'text-lg'}`}>
-                        {isScored ? `${score}점` : '-'}
-                      </span>
-                      {isWaitingTurn && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100/80 rounded">
-                          <Lock className="h-5 w-5 text-gray-400" />
-                        </div>
-                      )}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle className="flex items-center gap-2">
+                  <Button
+                    className={cn(
+                      'h-16 flex items-center justify-between p-4 relative overflow-hidden',
+                      isWaitingTurn
+                        ? 'opacity-50 cursor-not-allowed'
+                        : isScored
+                          ? 'cursor-not-allowed bg-gradient-to-br from-green-100 to-green-200 border-green-300 shadow-md transform'
+                          : 'hover:bg-green-50 hover:border-green-300',
+                    )}
+                    disabled={isWaitingTurn}
+                    variant={isScored ? 'secondary' : 'outline'}
+                  >
+                    {isScored && (
+                      <div className="absolute inset-0 bg-gradient-to-br from-green-50/40 to-green-100/40 pointer-events-none" />
+                    )}
+                    <div className="flex items-center gap-2">
+                      <span className={cn('font-bold relative z-10', isScored && 'text-green-700')}>
                         {CATEGORY_NAMES[category]}
-                        {/* 확장 룰 표시 */}
-                        {category === 'threeOfAKind' && extendedRules.enableThreeOfAKind && (
-                          <Badge className="text-xs bg-orange-100 text-orange-800" variant="outline">
-                            확장 룰
-                          </Badge>
-                        )}
-                        {category === 'fullHouse' && extendedRules.fullHouseFixedScore && (
-                          <Badge className="text-xs bg-orange-100 text-orange-800" variant="outline">
-                            고정 25점
-                          </Badge>
-                        )}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <ScoreInputContents
-                      category={category}
-                      extendedRules={extendedRules}
-                      onClose={() => setOpenDialog(null)}
-                      onScoreSubmit={handleScoreSubmit}
-                    />
-                  </DialogContent>
-                </Dialog>
+                      </span>
+                      {/* 확장 룰 표시 */}
+                      {category === 'threeOfAKind' && extendedRules.enableThreeOfAKind && (
+                        <Badge className="text-xs bg-orange-100 text-orange-800" variant="outline">
+                          확장
+                        </Badge>
+                      )}
+                      {category === 'fullHouse' && extendedRules.fullHouseFixedScore && (
+                        <Badge className="text-xs bg-orange-100 text-orange-800" variant="outline">
+                          고정 25점
+                        </Badge>
+                      )}
+                    </div>
+                    <span className={cn('font-bold relative z-10', isScored ? 'text-green-800 text-xl' : 'text-lg')}>
+                      {isScored ? `${score}점` : '-'}
+                    </span>
+                    {isWaitingTurn && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100/80 rounded">
+                        <Lock className="h-5 w-5 text-gray-400" />
+                      </div>
+                    )}
+                  </Button>
+                </LowerSectionDialog>
               )
             })}
           </div>
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+const UpperSectionDialog = ({
+  category,
+  extendedRules,
+  onScoreSubmit,
+  children,
+}: React.PropsWithChildren<{
+  category: (typeof UPPER_SECTION_CATEGORIES)[number]
+  extendedRules: ExtendedRules
+  onScoreSubmit: (category: ScoreCategory, score: number) => void
+}>) => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <Dialog onOpenChange={setIsOpen} open={isOpen}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <DiceIcon value={UPPER_SECTION_DICE_COUNT[category]} />
+            {CATEGORY_NAMES[category]}
+          </DialogTitle>
+        </DialogHeader>
+        <ScoreInputContents
+          category={category}
+          extendedRules={extendedRules}
+          onClose={() => setIsOpen(false)}
+          onScoreSubmit={onScoreSubmit}
+        />
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+const LowerSectionDialog = ({
+  category,
+  extendedRules,
+  onScoreSubmit,
+  children,
+}: React.PropsWithChildren<{
+  category: (typeof LOWER_SECTION_CATEGORIES)[number]
+  extendedRules: ExtendedRules
+  onScoreSubmit: (category: ScoreCategory, score: number) => void
+}>) => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <Dialog key={category} onOpenChange={setIsOpen} open={isOpen}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            {CATEGORY_NAMES[category]}
+            {/* 확장 룰 표시 */}
+            {category === 'threeOfAKind' && extendedRules.enableThreeOfAKind && (
+              <Badge className="text-xs bg-orange-100 text-orange-800" variant="outline">
+                확장 룰
+              </Badge>
+            )}
+            {category === 'fullHouse' && extendedRules.fullHouseFixedScore && (
+              <Badge className="text-xs bg-orange-100 text-orange-800" variant="outline">
+                고정 25점
+              </Badge>
+            )}
+          </DialogTitle>
+        </DialogHeader>
+        <ScoreInputContents
+          category={category}
+          extendedRules={extendedRules}
+          onClose={() => setIsOpen(false)}
+          onScoreSubmit={onScoreSubmit}
+        />
+      </DialogContent>
+    </Dialog>
   )
 }
