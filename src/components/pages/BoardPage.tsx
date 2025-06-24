@@ -1,6 +1,7 @@
 'use client'
 
-import { Crown, Maximize, Minimize } from 'lucide-react'
+import { ArrowLeft, Crown, Maximize, Minimize } from 'lucide-react'
+import Link from 'next/link'
 import { useState, useEffect } from 'react'
 
 import { QRCodeShareButton } from '@/components/game'
@@ -71,7 +72,18 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
       </div>
 
       {/* 상단 버튼들 */}
-      <div className="fixed top-6 right-6 z-50 flex gap-3">
+      <div className="fixed top-6 z-50 flex gap-3 left-4 right-4">
+        <Button
+          asChild
+          className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-200 mr-auto"
+          size="sm"
+          variant="outline"
+        >
+          <Link href="/">
+            <ArrowLeft className="h-4 w-4 mr-1" />홈
+          </Link>
+        </Button>
+
         {/* QR 코드 공유 버튼 */}
         {gameRoom.status === 'waiting' && (
           <QRCodeShareButton
