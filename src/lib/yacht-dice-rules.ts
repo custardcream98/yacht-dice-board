@@ -5,7 +5,7 @@ import {
   LOWER_SECTION_CATEGORIES,
   FIXED_SCORE_CATEGORIES,
 } from '@/constants/game'
-import { GameRoom, Player, ScoreCard, ScoreCategory } from '@/types/game'
+import { GameRoom, Player, ScoreCard, ScoreCategory, ExtendedRules } from '@/types/game'
 
 // 주사위 점수 계산 함수들
 export class YachtDiceCalculator {
@@ -14,19 +14,35 @@ export class YachtDiceCalculator {
     return dice.filter(die => die === target).reduce((sum, die) => sum + die, 0)
   }
 
+  // 3 of a Kind 계산
+  static calculateThreeOfAKind(dice: number[]): number {
+    const counts = this.getDiceCounts(dice)
+    const hasThreeOfAKind = Object.values(counts).some(count => count >= 3)
+    return hasThreeOfAKind ? dice.reduce((sum, die) => sum + die, 0) : 0
+  }
+
   // Poker 계산
-  static calculatePoker(dice: number[]): number {
+  static calculateFourOfAKind(dice: number[]): number {
     const counts = this.getDiceCounts(dice)
     const poker = Object.values(counts).some(count => count >= 4)
     return poker ? dice.reduce((sum, die) => sum + die, 0) : 0
   }
 
-  // Full House 계산
-  static calculateFullHouse(dice: number[]): number {
+  // Full House 계산 (확장 룰 지원)
+  static calculateFullHouse({ dice, fixedScore }: { dice: number[]; fixedScore: boolean }): number {
     const counts = this.getDiceCounts(dice)
     const countValues = Object.values(counts).sort((a, b) => b - a)
     const hasFullHouse = countValues[0] === 3 && countValues[1] === 2
-    return hasFullHouse ? dice.reduce((sum, die) => sum + die, 0) : 0
+
+    if (!hasFullHouse) return 0
+
+    // 확장 룰: Full House 고정 점수 사용
+    if (fixedScore) {
+      return FIXED_SCORE_CATEGORIES.fullHouse
+    }
+
+    // 기본 룰: 주사위 합계
+    return dice.reduce((sum, die) => sum + die, 0)
   }
 
   // Small Straight 계산 (15점 고정)
@@ -51,12 +67,20 @@ export class YachtDiceCalculator {
   }
 
   // Choice 계산 (모든 주사위 합)
-  static calculateChoice(dice: number[]): number {
+  static calculateChance(dice: number[]): number {
     return dice.reduce((sum, die) => sum + die, 0)
   }
 
-  // 메인 점수 계산 함수
-  static calculateScore(category: ScoreCategory, dice: number[]): number {
+  // 메인 점수 계산 함수 (확장 룰 지원)
+  static calculateScore({
+    category,
+    dice,
+    extendedRules,
+  }: {
+    category: ScoreCategory
+    dice: number[]
+    extendedRules: ExtendedRules
+  }): number {
     switch (category) {
       case 'ace':
         return this.calculateUpperSection(dice, 1)
@@ -70,18 +94,20 @@ export class YachtDiceCalculator {
         return this.calculateUpperSection(dice, 5)
       case 'hexa':
         return this.calculateUpperSection(dice, 6)
-      case 'poker':
-        return this.calculatePoker(dice)
+      case 'threeOfAKind':
+        return this.calculateThreeOfAKind(dice)
+      case 'fourOfAKind':
+        return this.calculateFourOfAKind(dice)
       case 'fullHouse':
-        return this.calculateFullHouse(dice)
+        return this.calculateFullHouse({ dice, fixedScore: extendedRules.fullHouseFixedScore })
       case 'smallStraight':
         return this.calculateSmallStraight(dice)
       case 'largeStraight':
         return this.calculateLargeStraight(dice)
       case 'yacht':
         return this.calculateYacht(dice)
-      case 'choice':
-        return this.calculateChoice(dice)
+      case 'chance':
+        return this.calculateChance(dice)
       default:
         return 0
     }
@@ -149,12 +175,13 @@ export const CATEGORY_NAMES: Record<ScoreCategory, string> = {
   quad: 'Quad',
   penta: 'Penta',
   hexa: 'Hexa',
-  poker: 'Poker',
+  threeOfAKind: '3 of a Kind',
+  fourOfAKind: '4 of a Kind',
   fullHouse: 'Full House',
   smallStraight: 'Small Straight',
   largeStraight: 'Large Straight',
   yacht: 'Yacht',
-  choice: 'Choice',
+  chance: 'Chance',
 }
 
 export const UPPER_SECTION_DICE_COUNT = {

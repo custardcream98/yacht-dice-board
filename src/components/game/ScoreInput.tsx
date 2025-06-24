@@ -1,5 +1,5 @@
 import { Calculator, Lock, Target, Plus, Minus, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6 } from 'lucide-react'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input'
 import { UPPER_SECTION_CATEGORIES, LOWER_SECTION_CATEGORIES, UPPER_SECTION_DICE_COUNT } from '@/constants/game'
 import { YachtDiceCalculator, CATEGORY_NAMES } from '@/lib/yacht-dice-rules'
-import { ScoreCategory, Player } from '@/types/game'
+import { ScoreCategory, Player, ExtendedRules } from '@/types/game'
 
 const DiceIcon = ({ value }: { value: number }) => {
   const icons = [Dice1, Dice2, Dice3, Dice4, Dice5, Dice6]
@@ -18,18 +18,22 @@ const DiceIcon = ({ value }: { value: number }) => {
 
 interface MobileScoreInputProps {
   category: ScoreCategory
+  extendedRules: ExtendedRules
   onClose?: () => void
   onScoreSubmit: (category: ScoreCategory, score: number) => void
 }
 
 type Dice = [number, number, number, number, number]
 const INITIAL_DICE = [1, 1, 1, 1, 1] as const satisfies Dice
-function ScoreInputContents({ category, onScoreSubmit, onClose }: MobileScoreInputProps) {
+function ScoreInputContents({ category, extendedRules, onScoreSubmit, onClose }: MobileScoreInputProps) {
   const [dice, setDice] = useState<Dice>(INITIAL_DICE)
   const [manualScore, setManualScore] = useState('')
   const [inputMode, setInputMode] = useState<'dice' | 'manual'>('dice')
 
-  const calculatedScore = YachtDiceCalculator.calculateScore(category, dice)
+  const calculatedScore = useMemo(
+    () => YachtDiceCalculator.calculateScore({ category, dice, extendedRules }),
+    [category, dice, extendedRules],
+  )
 
   // 최적화된 주사위 업데이트 함수
   const incrementDice = useCallback((index: number) => {
@@ -114,6 +118,10 @@ function ScoreInputContents({ category, onScoreSubmit, onClose }: MobileScoreInp
             <div className="text-sm text-gray-600 mb-1">계산된 점수</div>
             <div className="text-3xl font-bold text-blue-600">{calculatedScore}점</div>
             {isUpperSection && <div className="text-xs text-gray-500 mt-1">{category}의 합계</div>}
+            {/* 확장 룰 표시 */}
+            {category === 'fullHouse' && extendedRules.fullHouseFixedScore && (
+              <div className="text-xs text-orange-600 mt-1">고정 점수 적용 (25점)</div>
+            )}
           </div>
         </div>
       ) : (
@@ -152,18 +160,30 @@ function ScoreInputContents({ category, onScoreSubmit, onClose }: MobileScoreInp
 }
 
 interface ScoreInputProps {
+  extendedRules: ExtendedRules
   isMyTurn: boolean
   myPlayer: Player
   onScoreSubmit: (category: ScoreCategory, score: number) => void
 }
 
-export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProps) {
+export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProps) {
   const [openDialog, setOpenDialog] = useState<null | ScoreCategory>(null)
 
   const handleScoreSubmit = (category: ScoreCategory, score: number) => {
     onScoreSubmit(category, score)
     setOpenDialog(null) // 점수 제출 후 다이얼로그 닫기
   }
+
+  const visibleLowerCategories = useMemo(
+    () =>
+      LOWER_SECTION_CATEGORIES.filter(category => {
+        if (category === 'threeOfAKind') {
+          return extendedRules.enableThreeOfAKind
+        }
+        return true
+      }),
+    [extendedRules],
+  )
 
   return (
     <Card>
@@ -236,6 +256,7 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
                     </DialogHeader>
                     <ScoreInputContents
                       category={category}
+                      extendedRules={extendedRules}
                       onClose={() => setOpenDialog(null)}
                       onScoreSubmit={handleScoreSubmit}
                     />
@@ -250,7 +271,7 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
         <div>
           <h3 className="font-bold mb-3 text-green-700">하위 섹션</h3>
           <div className="grid grid-cols-1 gap-2">
-            {LOWER_SECTION_CATEGORIES.map(category => {
+            {visibleLowerCategories.map(category => {
               const score = myPlayer?.scores[category]
               const isScored = score !== undefined
               const isWaitingTurn = !isMyTurn
@@ -277,9 +298,22 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
                       {isScored && (
                         <div className="absolute inset-0 bg-gradient-to-br from-green-50/40 to-green-100/40 pointer-events-none" />
                       )}
-                      <span className={`font-bold relative z-10 ${isScored ? 'text-green-700' : ''}`}>
-                        {CATEGORY_NAMES[category]}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`font-bold relative z-10 ${isScored ? 'text-green-700' : ''}`}>
+                          {CATEGORY_NAMES[category]}
+                        </span>
+                        {/* 확장 룰 표시 */}
+                        {category === 'threeOfAKind' && extendedRules.enableThreeOfAKind && (
+                          <Badge className="text-xs bg-orange-100 text-orange-800" variant="outline">
+                            확장
+                          </Badge>
+                        )}
+                        {category === 'fullHouse' && extendedRules.fullHouseFixedScore && (
+                          <Badge className="text-xs bg-orange-100 text-orange-800" variant="outline">
+                            고정 25점
+                          </Badge>
+                        )}
+                      </div>
                       <span className={`font-bold relative z-10 ${isScored ? 'text-green-800 text-xl' : 'text-lg'}`}>
                         {isScored ? `${score}점` : '-'}
                       </span>
@@ -292,10 +326,24 @@ export function ScoreInput({ myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProp
                   </DialogTrigger>
                   <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                      <DialogTitle>{CATEGORY_NAMES[category]}</DialogTitle>
+                      <DialogTitle className="flex items-center gap-2">
+                        {CATEGORY_NAMES[category]}
+                        {/* 확장 룰 표시 */}
+                        {category === 'threeOfAKind' && extendedRules.enableThreeOfAKind && (
+                          <Badge className="text-xs bg-orange-100 text-orange-800" variant="outline">
+                            확장 룰
+                          </Badge>
+                        )}
+                        {category === 'fullHouse' && extendedRules.fullHouseFixedScore && (
+                          <Badge className="text-xs bg-orange-100 text-orange-800" variant="outline">
+                            고정 25점
+                          </Badge>
+                        )}
+                      </DialogTitle>
                     </DialogHeader>
                     <ScoreInputContents
                       category={category}
+                      extendedRules={extendedRules}
                       onClose={() => setOpenDialog(null)}
                       onScoreSubmit={handleScoreSubmit}
                     />

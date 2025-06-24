@@ -21,12 +21,13 @@ export const UPPER_SECTION_CATEGORIES = [
 
 // 하위 섹션 카테고리
 export const LOWER_SECTION_CATEGORIES = [
-  'poker',
+  'threeOfAKind',
+  'fourOfAKind',
   'fullHouse',
   'smallStraight',
   'largeStraight',
   'yacht',
-  'choice',
+  'chance',
 ] as const satisfies ScoreCategory[]
 
 // 점수 카테고리 순서

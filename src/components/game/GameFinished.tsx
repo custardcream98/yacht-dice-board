@@ -1,5 +1,3 @@
-'use client'
-
 import { Crown, Trophy, Medal, Target, TrendingUp, RotateCcw, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'

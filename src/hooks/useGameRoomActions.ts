@@ -1,9 +1,9 @@
 import { collection, doc, addDoc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { MAX_ROUNDS } from '@/constants/game'
 import { db } from '@/lib/firebase'
-import { GameRoom, Player } from '@/types/game'
+import { GameRoom, Player, ExtendedRules, DEFAULT_EXTENDED_RULES } from '@/types/game'
 
 /**
  * 게임방 생성, 참여, 삭제 등의 액션을 담당하는 훅
@@ -14,49 +14,59 @@ export function useGameRoomActions() {
   const [error, setError] = useState<null | string>(null)
 
   // 방 생성
-  const createRoom = async (roomName: string): Promise<string> => {
-    setLoading(true)
-    setError(null)
+  const createRoom = useCallback(
+    async ({
+      roomName,
+      extendedRules = DEFAULT_EXTENDED_RULES,
+    }: {
+      roomName: string
+      extendedRules?: ExtendedRules
+    }): Promise<string> => {
+      setLoading(true)
+      setError(null)
 
-    try {
-      const newRoom: Omit<GameRoom, 'id'> = {
-        name: roomName,
-        players: [],
-        currentPlayerIndex: 0,
-        currentRound: 1,
-        maxRounds: MAX_ROUNDS,
-        status: 'waiting',
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      }
-
-      const roomsRef = collection(db, 'gameRooms')
-      const docRef = await addDoc(roomsRef, newRoom)
-      const roomId = docRef.id
-
-      await updateDoc(docRef, { id: roomId })
-
-      return roomId
-    } catch (err) {
-      let errorMessage = '방 생성에 실패했습니다.'
-
-      if (err instanceof Error) {
-        if (err.message.includes('Missing or insufficient permissions')) {
-          errorMessage = 'Firestore 권한이 없습니다. Firebase Console에서 보안 규칙을 확인해주세요.'
-        } else {
-          errorMessage = err.message
+      try {
+        const newRoom: Omit<GameRoom, 'id'> = {
+          name: roomName,
+          players: [],
+          currentPlayerIndex: 0,
+          currentRound: 1,
+          maxRounds: MAX_ROUNDS,
+          extendedRules,
+          status: 'waiting',
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
         }
-      }
 
-      setError(errorMessage)
-      throw new Error(errorMessage)
-    } finally {
-      setLoading(false)
-    }
-  }
+        const roomsRef = collection(db, 'gameRooms')
+        const docRef = await addDoc(roomsRef, newRoom)
+        const roomId = docRef.id
+
+        await updateDoc(docRef, { id: roomId })
+
+        return roomId
+      } catch (err) {
+        let errorMessage = '방 생성에 실패했습니다.'
+
+        if (err instanceof Error) {
+          if (err.message.includes('Missing or insufficient permissions')) {
+            errorMessage = 'Firestore 권한이 없습니다. Firebase Console에서 보안 규칙을 확인해주세요.'
+          } else {
+            errorMessage = err.message
+          }
+        }
+
+        setError(errorMessage)
+        throw new Error(errorMessage)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [],
+  )
 
   // 방 참여
-  const joinRoom = async (roomId: string, playerName: string): Promise<void> => {
+  const joinRoom = useCallback(async (roomId: string, playerName: string): Promise<void> => {
     setLoading(true)
     setError(null)
 
@@ -97,10 +107,10 @@ export function useGameRoomActions() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   // 방 삭제
-  const deleteRoom = async (roomId: string): Promise<void> => {
+  const deleteRoom = useCallback(async (roomId: string): Promise<void> => {
     setLoading(true)
     setError(null)
 
@@ -114,7 +124,7 @@ export function useGameRoomActions() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   return {
     loading,

@@ -58,8 +58,8 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
     }
   }
 
-  // 플레이어 이름이 없거나 해당 플레이어를 찾을 수 없는 경우
-  if (!playerName || !myPlayer) {
+  // 플레이어가 없으면 에러 처리
+  if (!myPlayer) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-sm bg-yellow-50 border-yellow-200">
@@ -103,7 +103,12 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
         {gameRoom.status === 'playing' && (
           <>
             {/* 점수 입력 */}
-            <ScoreInput isMyTurn={!!isMyTurn} myPlayer={myPlayer} onScoreSubmit={handleScoreSubmit} />
+            <ScoreInput
+              extendedRules={gameRoom.extendedRules}
+              isMyTurn={!!isMyTurn}
+              myPlayer={myPlayer}
+              onScoreSubmit={handleScoreSubmit}
+            />
 
             {/* 플레이어 점수 요약 */}
             <PlayerScoreSummary gameRoom={gameRoom} myPlayer={myPlayer} />

@@ -1,9 +1,9 @@
 'use client'
 
-import { UserPlus, Monitor, Users, ArrowLeft, GamepadIcon } from 'lucide-react'
+import { UserPlus, Monitor, Users, ArrowLeft, GamepadIcon, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useId, useState, useTransition } from 'react'
+import { useCallback, useId, useMemo, useState, useTransition } from 'react'
 
 import { QRCodeShareButton } from '@/components/game'
 import { Badge } from '@/components/ui/badge'
@@ -29,26 +29,34 @@ export default function InvitePage({ roomId }: InvitePageProps) {
   const nameFormId = useId()
 
   // 방 참여 핸들러
-  const handleJoinRoom: React.FormEventHandler<HTMLFormElement> = async event => {
-    event.preventDefault()
+  const handleJoinRoom: React.FormEventHandler<HTMLFormElement> = useCallback(
+    async event => {
+      event.preventDefault()
 
-    if (!name) {
-      alert('플레이어 이름을 입력해주세요.')
-      return
-    }
+      if (!name) {
+        alert('플레이어 이름을 입력해주세요.')
+        return
+      }
 
-    setIsJoining(true)
-    try {
-      await joinRoom(roomId, name)
-      startTransition(() => {
-        router.push(`/room/${roomId}?player=${encodeURIComponent(name)}`)
-      })
-    } catch (error) {
-      alert(error instanceof Error ? error.message : '방 참여에 실패했습니다.')
-    } finally {
-      setIsJoining(false)
-    }
-  }
+      setIsJoining(true)
+      try {
+        await joinRoom(roomId, name)
+        startTransition(() => {
+          router.push(`/room/${roomId}?player=${encodeURIComponent(name)}`)
+        })
+      } catch (error) {
+        alert(error instanceof Error ? error.message : '방 참여에 실패했습니다.')
+      } finally {
+        setIsJoining(false)
+      }
+    },
+    [name, joinRoom, roomId, router],
+  )
+
+  const hasExtendedRules = useMemo(
+    () => Object.values(gameRoom.extendedRules).some(rule => rule),
+    [gameRoom.extendedRules],
+  )
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -103,6 +111,34 @@ export default function InvitePage({ roomId }: InvitePageProps) {
             </div>
           </CardContent>
         </Card>
+
+        {/* 확장 룰 정보 */}
+        {hasExtendedRules && (
+          <Card className="border-orange-200 bg-orange-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-orange-800">
+                <Settings className="h-4 w-4" />
+                <span className="text-sm">확장 룰 적용</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="-mt-4">
+              <ul className="space-y-2">
+                {gameRoom.extendedRules.fullHouseFixedScore && (
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <span className="text-sm text-orange-800">Full House 고정 점수 (25점)</span>
+                  </li>
+                )}
+                {gameRoom.extendedRules.enableThreeOfAKind && (
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <span className="text-sm text-orange-800">3 of a Kind 족보 추가</span>
+                  </li>
+                )}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
 
         {/* 게임 참여 */}
         <Card>
