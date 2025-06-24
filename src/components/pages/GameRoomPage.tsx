@@ -6,7 +6,9 @@ import { useRouter } from 'next/navigation'
 import { GameHeader, WaitingRoom, ScoreInput, PlayerScoreSummary, GameFinished } from '@/components/game'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { ValueConsumer } from '@/components/ValueConsumer'
 import { useGamePlay, useGameRoomActions, useGameRoomData } from '@/hooks'
+import { exhaustiveCheck } from '@/lib/types'
 import { ScoreCategory } from '@/types/game'
 
 export default function GameRoomPage({ roomId, playerName }: { roomId: string; playerName: string }) {
@@ -94,31 +96,31 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
       />
 
       <div className="p-4 space-y-4">
-        {/* 게임 시작 전 대기실 */}
-        {gameRoom.status === 'waiting' && (
-          <WaitingRoom gameRoom={gameRoom} myPlayer={myPlayer} onStartGame={handleStartGame} />
-        )}
+        <ValueConsumer value={gameRoom.status}>
+          {status => {
+            switch (status) {
+              case 'waiting':
+                return <WaitingRoom gameRoom={gameRoom} myPlayer={myPlayer} onStartGame={handleStartGame} />
+              case 'playing':
+                return (
+                  <>
+                    <ScoreInput
+                      extendedRules={gameRoom.extendedRules}
+                      isMyTurn={!!isMyTurn}
+                      myPlayer={myPlayer}
+                      onScoreSubmit={handleScoreSubmit}
+                    />
 
-        {/* 게임 진행 중 */}
-        {gameRoom.status === 'playing' && (
-          <>
-            {/* 점수 입력 */}
-            <ScoreInput
-              extendedRules={gameRoom.extendedRules}
-              isMyTurn={!!isMyTurn}
-              myPlayer={myPlayer}
-              onScoreSubmit={handleScoreSubmit}
-            />
-
-            {/* 플레이어 점수 요약 */}
-            <PlayerScoreSummary gameRoom={gameRoom} myPlayer={myPlayer} />
-          </>
-        )}
-
-        {/* 게임 종료 */}
-        {gameRoom.status === 'finished' && (
-          <GameFinished gameRoom={gameRoom} myPlayer={myPlayer} onRestartGame={handleRestartGame} />
-        )}
+                    <PlayerScoreSummary gameRoom={gameRoom} myPlayer={myPlayer} />
+                  </>
+                )
+              case 'finished':
+                return <GameFinished gameRoom={gameRoom} myPlayer={myPlayer} onRestartGame={handleRestartGame} />
+              default:
+                exhaustiveCheck(status)
+            }
+          }}
+        </ValueConsumer>
 
         {/* 하단 정보 */}
         <div className="text-center text-sm text-gray-500 pb-4">
