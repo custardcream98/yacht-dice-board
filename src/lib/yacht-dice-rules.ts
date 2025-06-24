@@ -5,7 +5,7 @@ import {
   LOWER_SECTION_CATEGORIES,
   FIXED_SCORE_CATEGORIES,
 } from '@/constants/game'
-import { ScoreCard, ScoreCategory } from '@/types/game'
+import { GameRoom, Player, ScoreCard, ScoreCategory } from '@/types/game'
 
 // 주사위 점수 계산 함수들
 export class YachtDiceCalculator {
@@ -159,4 +159,42 @@ export const CATEGORY_NAMES: Record<ScoreCategory, string> = {
 
 export const UPPER_SECTION_DICE_COUNT = {
   ones: 1,
+}
+
+export const getPlayerRankings = (gameRoom: GameRoom): { player: Player; ranking: number; totalScore: number }[] => {
+  const playersWithScores = gameRoom.players
+    .map(player => ({
+      player,
+      totalScore: YachtDiceCalculator.calculateTotalScore(player.scores),
+    }))
+    .sort((a, b) => b.totalScore - a.totalScore)
+
+  // 동점자 처리를 위한 순위 계산
+  const playersWithRankings: { player: Player; ranking: number; totalScore: number }[] = []
+  let currentRanking = 1
+
+  for (let i = 0; i < playersWithScores.length; i++) {
+    const currentPlayer = playersWithScores[i]
+
+    // 이전 플레이어와 점수가 다르면 순위 업데이트
+    if (i > 0 && playersWithScores[i - 1].totalScore !== currentPlayer.totalScore) {
+      currentRanking = i + 1
+    }
+
+    playersWithRankings.push({
+      player: currentPlayer.player,
+      ranking: currentRanking,
+      totalScore: currentPlayer.totalScore,
+    })
+  }
+
+  return playersWithRankings
+}
+
+export const getTiedPlayersInfo = (
+  gameRoom: GameRoom,
+  targetRanking: number,
+): { player: Player; totalScore: number }[] => {
+  const rankings = getPlayerRankings(gameRoom)
+  return rankings.filter(p => p.ranking === targetRanking).map(p => ({ player: p.player, totalScore: p.totalScore }))
 }

@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { YachtDiceCalculator } from '@/lib/yacht-dice-rules'
+import { getPlayerRankings, YachtDiceCalculator } from '@/lib/yacht-dice-rules'
 import { GameRoom, Player } from '@/types/game'
 
 interface GameFinishedProps {
@@ -26,23 +26,14 @@ export function GameFinished({ gameRoom, myPlayer, onRestartGame }: GameFinished
     }
   }
 
-  // 플레이어 순위 계산
-  const getPlayerRankings = () => {
-    return gameRoom.players
-      .map(player => ({
-        ...player,
-        total: YachtDiceCalculator.calculateTotalScore(player.scores),
-      }))
-      .sort((a, b) => b.total - a.total)
-  }
-
-  const rankings = getPlayerRankings()
-  const myRanking = rankings.findIndex(p => p.id === myPlayer.id) + 1
+  const rankings = getPlayerRankings(gameRoom)
+  const myRankingData = rankings.find(p => p.player.name === myPlayer.name)
+  const myRanking = myRankingData?.ranking || 0
   const upperSectionTotal = YachtDiceCalculator.calculateUpperSectionTotal(myPlayer.scores)
   const lowerSectionTotal = YachtDiceCalculator.calculateLowerSectionTotal(myPlayer.scores)
   const bonus = YachtDiceCalculator.calculateUpperBonus(myPlayer.scores)
   const myTotalScore = upperSectionTotal + lowerSectionTotal + bonus
-  const winner = rankings[0]
+  const winners = rankings.filter(p => p.ranking === 1) // 동점 1등 처리
 
   // 순위에 따른 메시지와 아이콘
   const getRankingDisplay = () => {
@@ -115,6 +106,8 @@ export function GameFinished({ gameRoom, myPlayer, onRestartGame }: GameFinished
                 <div className="text-4xl font-bold text-gray-800 mb-2">{myTotalScore}점</div>
                 <div className="text-sm text-gray-600">
                   {gameRoom.players.length}명 중 {myRanking}등
+                  {rankings.filter(p => p.ranking === myRanking).length > 1 &&
+                    ` (공동 ${rankings.filter(p => p.ranking === myRanking).length}명)`}
                 </div>
               </div>
 
@@ -153,11 +146,26 @@ export function GameFinished({ gameRoom, myPlayer, onRestartGame }: GameFinished
         <CardContent>
           <div className="text-center space-y-4">
             {/* 우승자 정보 */}
-            {winner && (
+            {winners.length > 0 && (
               <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-                <div className="text-lg mb-2">🏆 우승자</div>
-                <div className="font-bold text-xl text-yellow-800">{winner.name}</div>
-                <div className="text-lg font-mono text-yellow-700">{winner.total}점</div>
+                <div className="text-lg mb-2">
+                  🏆 {winners.length > 1 ? `공동 우승자 (${winners.length}명)` : '우승자'}
+                </div>
+                {winners.length === 1 ? (
+                  <>
+                    <div className="font-bold text-xl text-yellow-800">{winners[0].player.name}</div>
+                    <div className="text-lg font-mono text-yellow-700">{winners[0].totalScore}점</div>
+                  </>
+                ) : (
+                  <div className="space-y-2">
+                    {winners.map(winner => (
+                      <div className="flex justify-between items-center" key={winner.player.name}>
+                        <div className="font-bold text-lg text-yellow-800">{winner.player.name}</div>
+                        <div className="text-lg font-mono text-yellow-700">{winner.totalScore}점</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
