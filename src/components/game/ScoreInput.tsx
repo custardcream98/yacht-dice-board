@@ -211,6 +211,14 @@ const UpperSectionDialog = ({
   )
 }
 
+const DICE_VALUE_TO_JOSA = {
+  1: '이',
+  2: '가',
+  3: '이',
+  4: '가',
+  5: '가',
+  6: '이',
+} as const satisfies Record<DiceValue, string>
 const UpperSectionInput = ({
   category,
   onScoreSubmit,
@@ -233,9 +241,8 @@ const UpperSectionInput = ({
   return (
     <div className="space-y-6">
       <div className="text-center bg-gray-50 p-3 rounded-lg">
-        <div className="flex items-center justify-center gap-2 mb-1">
-          <DiceIcon value={diceValue} />
-          <span className="text-sm font-medium text-gray-700">{diceValue}이 나온 주사위 개수를 입력하세요</span>
+        <div className="mb-1 text-sm font-medium text-gray-700">
+          {diceValue} {DICE_VALUE_TO_JOSA[diceValue]} 나온 주사위 개수를 입력하세요
         </div>
         <div className="text-xs text-gray-500">최대 5개까지 입력 가능합니다</div>
       </div>
