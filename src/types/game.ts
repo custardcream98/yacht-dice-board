@@ -1,4 +1,6 @@
-// Yacht Dice 게임 타입 정의
+export type DiceValue = 1 | 2 | 3 | 4 | 5 | 6
+
+export type DiceHand = [DiceValue, DiceValue, DiceValue, DiceValue, DiceValue]
 
 export interface Player {
   id: string
@@ -27,7 +29,6 @@ export interface ScoreCard {
   fourOfAKind?: number
   fullHouse?: number
   hexa?: number
-
   largeStraight?: number
   penta?: number
   quad?: number
@@ -50,16 +51,4 @@ export interface GameRoom {
   updatedAt: number
 }
 
-export interface DiceRoll {
-  dice: number[] // 5개 주사위 값
-  rollCount: number // 현재 롤 횟수 (최대 3회)
-}
-
 export type ScoreCategory = keyof ScoreCard
-
-// 점수 계산 결과
-export interface ScoreCalculation {
-  category: ScoreCategory
-  isValid: boolean
-  score: number
-}

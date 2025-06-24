@@ -3,114 +3,65 @@ import {
   UPPER_BONUS_SCORE,
   UPPER_SECTION_CATEGORIES,
   LOWER_SECTION_CATEGORIES,
-  FIXED_SCORE_CATEGORIES,
 } from '@/constants/game'
-import { GameRoom, Player, ScoreCard, ScoreCategory, ExtendedRules } from '@/types/game'
+import { DiceHand, DiceValue, GameRoom, Player, ScoreCard, ScoreCategory } from '@/types/game'
 
 // 주사위 점수 계산 함수들
 export class YachtDiceCalculator {
   // 상위 섹션 점수 계산
-  static calculateUpperSection(dice: number[], target: number): number {
-    return dice.filter(die => die === target).reduce((sum, die) => sum + die, 0)
+  static calculateUpperSection(diceCount: number, target: DiceValue): number {
+    return diceCount * target
   }
 
   // 3 of a Kind 계산
-  static calculateThreeOfAKind(dice: number[]): number {
-    const counts = this.getDiceCounts(dice)
+  static calculateThreeOfAKind(diceHand: DiceHand): number {
+    const counts = YachtDiceCalculator.getDiceCounts(diceHand)
     const hasThreeOfAKind = Object.values(counts).some(count => count >= 3)
-    return hasThreeOfAKind ? dice.reduce((sum, die) => sum + die, 0) : 0
+    return hasThreeOfAKind ? diceHand.reduce((sum, die) => sum + die, 0) : 0
   }
 
-  // Poker 계산
-  static calculateFourOfAKind(dice: number[]): number {
-    const counts = this.getDiceCounts(dice)
-    const poker = Object.values(counts).some(count => count >= 4)
-    return poker ? dice.reduce((sum, die) => sum + die, 0) : 0
+  // 4 of a Kind 계산
+  static calculateFourOfAKind(diceHand: DiceHand): number {
+    const counts = YachtDiceCalculator.getDiceCounts(diceHand)
+    const hasFourOfAKind = Object.values(counts).some(count => count >= 4)
+    return hasFourOfAKind ? diceHand.reduce((sum, die) => sum + die, 0) : 0
   }
 
-  // Full House 계산 (확장 룰 지원)
-  static calculateFullHouse({ dice, fixedScore }: { dice: number[]; fixedScore: boolean }): number {
-    const counts = this.getDiceCounts(dice)
+  // Full House 계산
+  static calculateFullHouse(diceHand: DiceHand): number {
+    const counts = YachtDiceCalculator.getDiceCounts(diceHand)
     const countValues = Object.values(counts).sort((a, b) => b - a)
     const hasFullHouse = countValues[0] === 3 && countValues[1] === 2
 
     if (!hasFullHouse) return 0
 
-    // 확장 룰: Full House 고정 점수 사용
-    if (fixedScore) {
-      return FIXED_SCORE_CATEGORIES.fullHouse
-    }
-
-    // 기본 룰: 주사위 합계
-    return dice.reduce((sum, die) => sum + die, 0)
+    return diceHand.reduce((sum, die) => sum + die, 0)
   }
 
   // Small Straight 계산 (15점 고정)
-  static calculateSmallStraight(dice: number[]): number {
-    const uniqueDice = [...new Set(dice)].sort()
-    const hasSmallStraight = this.hasConsecutive(uniqueDice, 4)
-    return hasSmallStraight ? FIXED_SCORE_CATEGORIES.smallStraight : 0
-  }
+  // static calculateSmallStraight(dice: number[]): number {
+  //   const uniqueDice = [...new Set(dice)].sort()
+  //   const hasSmallStraight = YachtDiceCalculator.hasConsecutive(uniqueDice, 4)
+  //   return hasSmallStraight ? FIXED_SCORE_CATEGORIES.smallStraight : 0
+  // }
 
   // Large Straight 계산 (30점 고정)
-  static calculateLargeStraight(dice: number[]): number {
-    const uniqueDice = [...new Set(dice)].sort()
-    const hasLargeStraight = this.hasConsecutive(uniqueDice, 5)
-    return hasLargeStraight ? FIXED_SCORE_CATEGORIES.largeStraight : 0
-  }
+  // static calculateLargeStraight(dice: number[]): number {
+  //   const uniqueDice = [...new Set(dice)].sort()
+  //   const hasLargeStraight = YachtDiceCalculator.hasConsecutive(uniqueDice, 5)
+  //   return hasLargeStraight ? FIXED_SCORE_CATEGORIES.largeStraight : 0
+  // }
 
   // Yacht 계산 (50점 고정)
-  static calculateYacht(dice: number[]): number {
-    const firstDie = dice[0]
-    const isYacht = dice.every(die => die === firstDie)
-    return isYacht ? FIXED_SCORE_CATEGORIES.yacht : 0
-  }
+  // static calculateYacht(dice: number[]): number {
+  //   const firstDie = dice[0]
+  //   const isYacht = dice.every(die => die === firstDie)
+  //   return isYacht ? FIXED_SCORE_CATEGORIES.yacht : 0
+  // }
 
-  // Choice 계산 (모든 주사위 합)
+  // Chance 계산 (모든 주사위 합)
   static calculateChance(dice: number[]): number {
     return dice.reduce((sum, die) => sum + die, 0)
-  }
-
-  // 메인 점수 계산 함수 (확장 룰 지원)
-  static calculateScore({
-    category,
-    dice,
-    extendedRules,
-  }: {
-    category: ScoreCategory
-    dice: number[]
-    extendedRules: ExtendedRules
-  }): number {
-    switch (category) {
-      case 'ace':
-        return this.calculateUpperSection(dice, 1)
-      case 'dual':
-        return this.calculateUpperSection(dice, 2)
-      case 'triple':
-        return this.calculateUpperSection(dice, 3)
-      case 'quad':
-        return this.calculateUpperSection(dice, 4)
-      case 'penta':
-        return this.calculateUpperSection(dice, 5)
-      case 'hexa':
-        return this.calculateUpperSection(dice, 6)
-      case 'threeOfAKind':
-        return this.calculateThreeOfAKind(dice)
-      case 'fourOfAKind':
-        return this.calculateFourOfAKind(dice)
-      case 'fullHouse':
-        return this.calculateFullHouse({ dice, fixedScore: extendedRules.fullHouseFixedScore })
-      case 'smallStraight':
-        return this.calculateSmallStraight(dice)
-      case 'largeStraight':
-        return this.calculateLargeStraight(dice)
-      case 'yacht':
-        return this.calculateYacht(dice)
-      case 'chance':
-        return this.calculateChance(dice)
-      default:
-        return 0
-    }
   }
 
   // 상위 섹션 총점 계산
@@ -129,42 +80,49 @@ export class YachtDiceCalculator {
 
   // 보너스 점수 계산 (상위 섹션 합이 63 이상이면 35점)
   static calculateUpperBonus(scores: ScoreCard): number {
-    const upperTotal = this.calculateUpperSectionTotal(scores)
+    const upperTotal = YachtDiceCalculator.calculateUpperSectionTotal(scores)
     return upperTotal >= UPPER_BONUS_THRESHOLD ? UPPER_BONUS_SCORE : 0
   }
 
   // 총점 계산
   static calculateTotalScore(scores: ScoreCard): number {
-    const upperTotal = this.calculateUpperSectionTotal(scores)
-    const lowerTotal = this.calculateLowerSectionTotal(scores)
-    const bonus = this.calculateUpperBonus(scores)
+    const upperTotal = YachtDiceCalculator.calculateUpperSectionTotal(scores)
+    const lowerTotal = YachtDiceCalculator.calculateLowerSectionTotal(scores)
+    const bonus = YachtDiceCalculator.calculateUpperBonus(scores)
     return upperTotal + lowerTotal + bonus
   }
 
   // 유틸리티 함수들
-  private static getDiceCounts(dice: number[]): Record<number, number> {
-    return dice.reduce(
+  private static getDiceCounts(dice: DiceHand): Record<DiceValue, number> {
+    return dice.reduce<Record<DiceValue, number>>(
       (counts, die) => {
         counts[die] = (counts[die] || 0) + 1
         return counts
       },
-      {} as Record<number, number>,
+      {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+      },
     )
   }
 
-  private static hasConsecutive(sortedArray: number[], length: number): boolean {
-    for (let i = 0; i <= sortedArray.length - length; i++) {
-      let consecutive = true
-      for (let j = 1; j < length; j++) {
-        if (sortedArray[i + j] !== sortedArray[i] + j) {
-          consecutive = false
-          break
-        }
-      }
-      if (consecutive) return true
-    }
-    return false
-  }
+  // private static hasConsecutive(sortedArray: number[], length: number): boolean {
+  //   for (let i = 0; i <= sortedArray.length - length; i++) {
+  //     let consecutive = true
+  //     for (let j = 1; j < length; j++) {
+  //       if (sortedArray[i + j] !== sortedArray[i] + j) {
+  //         consecutive = false
+  //         break
+  //       }
+  //     }
+  //     if (consecutive) return true
+  //   }
+  //   return false
+  // }
 }
 
 // 카테고리 한글 이름 매핑

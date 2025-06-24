@@ -5,159 +5,22 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { UPPER_SECTION_CATEGORIES, LOWER_SECTION_CATEGORIES, UPPER_SECTION_DICE_COUNT } from '@/constants/game'
+import { ValueConsumer } from '@/components/ValueConsumer'
+import {
+  UPPER_SECTION_CATEGORIES,
+  LOWER_SECTION_CATEGORIES,
+  UPPER_SECTION_DICE_COUNT,
+  FIXED_SCORE_CATEGORIES,
+} from '@/constants/game'
+import { exhaustiveCheck } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { YachtDiceCalculator, CATEGORY_NAMES } from '@/lib/yacht-dice-rules'
-import { ScoreCategory, Player, ExtendedRules } from '@/types/game'
+import { ScoreCategory, Player, ExtendedRules, DiceValue, DiceHand } from '@/types/game'
 
-const DiceIcon = ({ value }: { value: number }) => {
-  const icons = [Dice1, Dice2, Dice3, Dice4, Dice5, Dice6]
-  const Icon = icons[value - 1] || Dice1
+const DICE_ICONS = [Dice1, Dice2, Dice3, Dice4, Dice5, Dice6] as const
+const DiceIcon = ({ value }: { value: DiceValue }) => {
+  const Icon = DICE_ICONS[value - 1]
   return <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
-}
-
-interface MobileScoreInputProps {
-  category: ScoreCategory
-  extendedRules: ExtendedRules
-  onClose?: () => void
-  onScoreSubmit: (category: ScoreCategory, score: number) => void
-}
-
-type Dice = [number, number, number, number, number]
-const INITIAL_DICE = [1, 1, 1, 1, 1] as const satisfies Dice
-function ScoreInputContents({ category, extendedRules, onScoreSubmit, onClose }: MobileScoreInputProps) {
-  const [dice, setDice] = useState<Dice>(INITIAL_DICE)
-  const [manualScore, setManualScore] = useState('')
-  const [inputMode, setInputMode] = useState<'dice' | 'manual'>('dice')
-
-  const calculatedScore = useMemo(
-    () => YachtDiceCalculator.calculateScore({ category, dice, extendedRules }),
-    [category, dice, extendedRules],
-  )
-
-  // 최적화된 주사위 업데이트 함수
-  const incrementDice = useCallback((index: number) => {
-    setDice(prevDice => {
-      const newDice: Dice = [...prevDice]
-      newDice[index] = prevDice[index] + 1
-      return newDice
-    })
-  }, [])
-
-  const decrementDice = useCallback((index: number) => {
-    setDice(prevDice => {
-      const newDice: Dice = [...prevDice]
-      newDice[index] = prevDice[index] - 1
-      return newDice
-    })
-  }, [])
-
-  const handleSubmit = () => {
-    const score = inputMode === 'dice' ? calculatedScore : parseInt(manualScore) || 0
-    onScoreSubmit(category, score)
-    onClose?.()
-  }
-
-  const isUpperSection = UPPER_SECTION_CATEGORIES.some(c => c === category)
-
-  return (
-    <div className="space-y-4">
-      {/* 입력 모드 선택 */}
-      <div className="flex gap-2 mb-4">
-        <Button
-          className="flex-1 text-xs sm:text-sm"
-          onClick={() => setInputMode('dice')}
-          variant={inputMode === 'dice' ? 'default' : 'outline'}
-        >
-          🎲 주사위 입력
-        </Button>
-        <Button
-          className="flex-1 text-xs sm:text-sm"
-          onClick={() => setInputMode('manual')}
-          variant={inputMode === 'manual' ? 'default' : 'outline'}
-        >
-          ✏️ 직접 입력
-        </Button>
-      </div>
-
-      {inputMode === 'dice' ? (
-        <div className="space-y-4">
-          {/* 주사위 입력 */}
-          <div className="grid grid-cols-5 gap-2">
-            {dice.map((value, index) => (
-              <div className="text-center" key={index}>
-                <div className="flex flex-col gap-1">
-                  <Button
-                    className="h-8 w-full p-0"
-                    disabled={value >= 6}
-                    onClick={() => incrementDice(index)}
-                    size="sm"
-                    variant="outline"
-                  >
-                    <Plus className="h-3 w-3" />
-                  </Button>
-                  <div className="flex items-center justify-center h-16 border-2 border-gray-300 rounded-lg bg-white">
-                    <DiceIcon value={value} />
-                  </div>
-                  <Button
-                    className="h-8 w-full p-0"
-                    disabled={value <= 1}
-                    onClick={() => decrementDice(index)}
-                    size="sm"
-                    variant="outline"
-                  >
-                    <Minus className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* 계산된 점수 표시 */}
-          <div className="bg-blue-50 p-4 rounded-lg text-center">
-            <div className="text-sm text-gray-600 mb-1">계산된 점수</div>
-            <div className="text-3xl font-bold text-blue-600">{calculatedScore}점</div>
-            {isUpperSection && <div className="text-xs text-gray-500 mt-1">{category}의 합계</div>}
-            {/* 확장 룰 표시 */}
-            {category === 'fullHouse' && extendedRules.fullHouseFixedScore && (
-              <div className="text-xs text-orange-600 mt-1">고정 점수 적용 (25점)</div>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {/* 수동 입력 */}
-          <div>
-            <label className="block text-sm font-medium mb-2">점수 직접 입력</label>
-            <Input
-              className="text-lg text-center"
-              min="0"
-              onChange={e => setManualScore(e.target.value)}
-              placeholder="점수를 입력하세요"
-              type="number"
-              value={manualScore}
-            />
-          </div>
-
-          <div className="bg-gray-50 p-4 rounded-lg text-center">
-            <div className="text-sm text-gray-600 mb-1">입력할 점수</div>
-            <div className="text-3xl font-bold text-gray-700">{manualScore || '0'}점</div>
-          </div>
-        </div>
-      )}
-
-      {/* 제출 버튼 */}
-      <Button
-        className="w-full h-12 text-lg font-bold"
-        disabled={inputMode === 'manual' && !manualScore}
-        onClick={handleSubmit}
-      >
-        <Target className="h-5 w-5 mr-2" />
-        점수 제출하기
-      </Button>
-    </div>
-  )
 }
 
 interface ScoreInputProps {
@@ -204,12 +67,7 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
               const isWaitingTurn = !isMyTurn
 
               return (
-                <UpperSectionDialog
-                  category={category}
-                  extendedRules={extendedRules}
-                  key={category}
-                  onScoreSubmit={onScoreSubmit}
-                >
+                <UpperSectionDialog category={category} key={category} onScoreSubmit={onScoreSubmit}>
                   <Button
                     className={cn(
                       'h-16 flex flex-col items-center justify-center p-2 relative overflow-hidden',
@@ -220,6 +78,11 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
                           : 'hover:bg-blue-50 hover:border-blue-300',
                     )}
                     disabled={isWaitingTurn}
+                    onClick={event => {
+                      if (isScored) {
+                        event.preventDefault()
+                      }
+                    }}
                     variant={isScored ? 'secondary' : 'outline'}
                   >
                     {isScored && (
@@ -255,6 +118,10 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
               const isScored = score !== undefined
               const isWaitingTurn = !isMyTurn
 
+              const isExtendedRule =
+                (category === 'threeOfAKind' && extendedRules.enableThreeOfAKind) ||
+                (category === 'fullHouse' && extendedRules.fullHouseFixedScore)
+
               return (
                 <LowerSectionDialog
                   category={category}
@@ -272,6 +139,11 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
                           : 'hover:bg-green-50 hover:border-green-300',
                     )}
                     disabled={isWaitingTurn}
+                    onClick={event => {
+                      if (isScored) {
+                        event.preventDefault()
+                      }
+                    }}
                     variant={isScored ? 'secondary' : 'outline'}
                   >
                     {isScored && (
@@ -282,14 +154,9 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
                         {CATEGORY_NAMES[category]}
                       </span>
                       {/* 확장 룰 표시 */}
-                      {category === 'threeOfAKind' && extendedRules.enableThreeOfAKind && (
+                      {isExtendedRule && (
                         <Badge className="text-xs bg-orange-100 text-orange-800" variant="outline">
                           확장
-                        </Badge>
-                      )}
-                      {category === 'fullHouse' && extendedRules.fullHouseFixedScore && (
-                        <Badge className="text-xs bg-orange-100 text-orange-800" variant="outline">
-                          고정 25점
                         </Badge>
                       )}
                     </div>
@@ -314,12 +181,10 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
 
 const UpperSectionDialog = ({
   category,
-  extendedRules,
   onScoreSubmit,
   children,
 }: React.PropsWithChildren<{
   category: (typeof UPPER_SECTION_CATEGORIES)[number]
-  extendedRules: ExtendedRules
   onScoreSubmit: (category: ScoreCategory, score: number) => void
 }>) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -334,16 +199,137 @@ const UpperSectionDialog = ({
             {CATEGORY_NAMES[category]}
           </DialogTitle>
         </DialogHeader>
-        <ScoreInputContents
+        <UpperSectionInput
           category={category}
-          extendedRules={extendedRules}
-          onClose={() => setIsOpen(false)}
-          onScoreSubmit={onScoreSubmit}
+          onScoreSubmit={score => {
+            onScoreSubmit(category, score)
+            setIsOpen(false)
+          }}
         />
       </DialogContent>
     </Dialog>
   )
 }
+
+const UpperSectionInput = ({
+  category,
+  onScoreSubmit,
+}: {
+  category: (typeof UPPER_SECTION_CATEGORIES)[number]
+  onScoreSubmit: (score: number) => void
+}) => {
+  const [diceCount, setDiceCount] = useState(0)
+
+  const increment = () => setDiceCount(prev => prev + 1)
+  const decrement = () => setDiceCount(prev => prev - 1)
+
+  const calculatedScore = useMemo(
+    () => YachtDiceCalculator.calculateUpperSection(diceCount, UPPER_SECTION_DICE_COUNT[category]),
+    [diceCount, category],
+  )
+
+  const diceValue = UPPER_SECTION_DICE_COUNT[category]
+
+  return (
+    <div className="space-y-6">
+      <div className="text-center bg-gray-50 p-3 rounded-lg">
+        <div className="flex items-center justify-center gap-2 mb-1">
+          <DiceIcon value={diceValue} />
+          <span className="text-sm font-medium text-gray-700">{diceValue}이 나온 주사위 개수를 입력하세요</span>
+        </div>
+        <div className="text-xs text-gray-500">최대 5개까지 입력 가능합니다</div>
+      </div>
+
+      {/* 주사위 개수 입력 */}
+      <div className="flex items-center justify-center gap-4">
+        <Button
+          className="h-12 w-12 rounded-full"
+          disabled={diceCount <= 0}
+          onClick={decrement}
+          size="sm"
+          variant="outline"
+        >
+          <Minus className="h-4 w-4" />
+        </Button>
+
+        <div className="flex items-center justify-center h-20 w-20 border-2 border-blue-300 rounded-xl bg-blue-50 text-2xl font-bold text-blue-700">
+          {diceCount}
+        </div>
+
+        <Button
+          className="h-12 w-12 rounded-full"
+          disabled={diceCount >= 5}
+          onClick={increment}
+          size="sm"
+          variant="outline"
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* 계산된 점수 표시 */}
+      <div className="bg-blue-50 p-4 rounded-lg text-center border border-blue-200">
+        <div className="text-sm text-blue-600 mb-1 font-medium">계산된 점수</div>
+        <div className="text-3xl font-bold text-blue-700">{calculatedScore}점</div>
+        <div className="text-xs text-blue-500 mt-1">
+          {diceValue} × {diceCount} = {calculatedScore}
+        </div>
+      </div>
+
+      {/* 제출 버튼 */}
+      <div className="flex gap-2 w-full">
+        <Button className="h-12 text-lg font-bold" onClick={() => onScoreSubmit(0)} variant="outline">
+          0점 제출하기
+        </Button>
+        <Button
+          className="flex-1 h-12 text-lg font-bold"
+          disabled={diceCount === 0}
+          onClick={() => onScoreSubmit(calculatedScore)}
+        >
+          <Target className="h-5 w-5 mr-1" />
+          점수 제출하기
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+const THREE_OF_A_KIND_INFO = {
+  description: '같은 숫자 3개',
+} as const satisfies HandInfo
+
+const FOUR_OF_A_KIND_INFO = {
+  description: '같은 숫자 4개',
+} as const satisfies HandInfo
+
+const FULL_HOUSE_INFO = {
+  description: '같은 숫자 3개와 같은 숫자 2개',
+  examples: [[1, 1, 1, 2, 2]],
+  score: FIXED_SCORE_CATEGORIES.fullHouse,
+} as const satisfies YesNoInputInfo
+
+const SMALL_STRAIGHT_INFO = {
+  description: '연속된 4개의 숫자',
+  examples: [
+    [1, 2, 3, 4],
+    [2, 3, 4, 5],
+    [3, 4, 5, 6],
+  ],
+  score: FIXED_SCORE_CATEGORIES.smallStraight,
+} as const satisfies YesNoInputInfo
+
+const LARGE_STRAIGHT_INFO = {
+  description: '연속된 5개의 숫자',
+  examples: [
+    [1, 2, 3, 4, 5],
+    [2, 3, 4, 5, 6],
+  ],
+  score: FIXED_SCORE_CATEGORIES.largeStraight,
+} as const satisfies YesNoInputInfo
+
+const CHANCE_INFO = {
+  description: '모든 주사위의 합이 점수가 됩니다',
+} as const satisfies HandInfo
 
 const LowerSectionDialog = ({
   category,
@@ -377,13 +363,249 @@ const LowerSectionDialog = ({
             )}
           </DialogTitle>
         </DialogHeader>
-        <ScoreInputContents
-          category={category}
-          extendedRules={extendedRules}
-          onClose={() => setIsOpen(false)}
-          onScoreSubmit={onScoreSubmit}
-        />
+        <ValueConsumer value={category}>
+          {value => {
+            const handleSubmit = (score: number) => {
+              onScoreSubmit(value, score)
+              setIsOpen(false)
+            }
+
+            switch (value) {
+              case 'threeOfAKind':
+                return (
+                  <DiceInput
+                    {...THREE_OF_A_KIND_INFO}
+                    calculateScore={YachtDiceCalculator.calculateThreeOfAKind}
+                    onScoreSubmit={handleSubmit}
+                  />
+                )
+              case 'fourOfAKind':
+                return (
+                  <DiceInput
+                    {...FOUR_OF_A_KIND_INFO}
+                    calculateScore={YachtDiceCalculator.calculateFourOfAKind}
+                    onScoreSubmit={handleSubmit}
+                  />
+                )
+              case 'fullHouse': {
+                if (extendedRules.fullHouseFixedScore) {
+                  return <YesNoInput {...FULL_HOUSE_INFO} onScoreSubmit={handleSubmit} />
+                } else {
+                  return (
+                    <DiceInput
+                      calculateScore={YachtDiceCalculator.calculateFullHouse}
+                      description={FULL_HOUSE_INFO.description}
+                      onScoreSubmit={handleSubmit}
+                    />
+                  )
+                }
+              }
+              case 'smallStraight':
+                return <YesNoInput {...SMALL_STRAIGHT_INFO} onScoreSubmit={handleSubmit} />
+              case 'largeStraight':
+                return <YesNoInput {...LARGE_STRAIGHT_INFO} onScoreSubmit={handleSubmit} />
+              case 'yacht':
+                return <YachtYesNoInput onScoreSubmit={handleSubmit} />
+              case 'chance':
+                return (
+                  <DiceInput
+                    {...CHANCE_INFO}
+                    calculateScore={YachtDiceCalculator.calculateChance}
+                    onScoreSubmit={handleSubmit}
+                  />
+                )
+
+              default:
+                exhaustiveCheck(value)
+            }
+          }}
+        </ValueConsumer>
       </DialogContent>
     </Dialog>
+  )
+}
+
+type HandInfo = {
+  description: string
+}
+
+type YesNoInputInfo = HandInfo & {
+  examples?: DiceValue[][]
+  score: number
+}
+const YesNoInput = ({
+  description,
+  examples,
+  score,
+  onScoreSubmit,
+}: YesNoInputInfo & { onScoreSubmit: (score: number) => void }) => {
+  return (
+    <div className="space-y-6">
+      {/* 족보 설명 */}
+      <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+        <p className="text-green-700 font-bold text-center">{description}</p>
+        {examples && (
+          <div className="space-y-1 mt-3">
+            <div className="text-sm text-green-600 font-medium">예시:</div>
+            {examples.map((example, idx) => (
+              <div
+                className="text-green-600 bg-white/50 px-2 py-1 rounded flex items-center gap-1 justify-center"
+                key={idx}
+              >
+                {example.map((dice, index) => (
+                  <DiceIcon key={index} value={dice} />
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 질문 */}
+      <div className="text-center">
+        <p className="text-lg font-medium text-gray-800 mb-4">위 조건에 맞는 주사위가 나왔나요?</p>
+      </div>
+
+      {/* 버튼 */}
+      <div className="flex gap-3 w-full">
+        <Button
+          className="h-14 text-lg font-bold bg-gray-100 hover:bg-gray-200 text-gray-700"
+          onClick={() => onScoreSubmit(0)}
+          variant="outline"
+        >
+          포기하기 (0점)
+        </Button>
+        <Button
+          className="flex-1 h-14 text-lg font-bold bg-green-600 hover:bg-green-700"
+          onClick={() => onScoreSubmit(score)}
+        >
+          <Target className="h-5 w-5 mr-2" />
+          네! ({score}점)
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+const YachtYesNoInput = ({ onScoreSubmit }: { onScoreSubmit: (score: number) => void }) => {
+  return (
+    <div className="space-y-6">
+      {/* 족보 설명 */}
+      <div className="bg-gradient-to-br from-yellow-50 to-orange-100 p-4 rounded-lg border border-yellow-200">
+        <div className="text-center mb-3 text-xl font-bold text-orange-800">요트</div>
+        <p className="text-orange-700 text-center">같은 숫자 5개</p>
+      </div>
+
+      {/* 축하 질문 */}
+      <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+        <p className="text-lg font-medium text-gray-800 mb-2">요트가 나왔나요?</p>
+        <p className="text-sm text-gray-600">게임의 최고 점수입니다!</p>
+      </div>
+
+      {/* 버튼 */}
+      <div className="flex gap-3">
+        <Button
+          className="flex-1 h-14 text-lg font-bold bg-gray-100 hover:bg-gray-200 text-gray-700"
+          onClick={() => onScoreSubmit(0)}
+          variant="outline"
+        >
+          아니요 (0점)
+        </Button>
+        <Button
+          className="flex-1 h-14 text-lg font-bold bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg"
+          onClick={() => onScoreSubmit(FIXED_SCORE_CATEGORIES.yacht)}
+        >
+          <Target className="h-5 w-5 mr-2" />
+          🎉 네! ({FIXED_SCORE_CATEGORIES.yacht}점)
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+const INITIAL_DICE = [1, 1, 1, 1, 1] as const satisfies DiceHand
+function DiceInput({
+  description,
+  calculateScore,
+  onScoreSubmit,
+}: HandInfo & {
+  calculateScore: (dice: DiceHand) => number
+  onScoreSubmit: (score: number) => void
+}) {
+  const [dice, setDice] = useState<DiceHand>(INITIAL_DICE)
+
+  const calculatedScore = useMemo(() => calculateScore(dice), [dice, calculateScore])
+
+  const incrementDice = useCallback((index: number) => {
+    setDice(prevDice => {
+      const newDice: DiceHand = [...prevDice]
+      newDice[index] = (prevDice[index] + 1) as DiceValue
+      return newDice
+    })
+  }, [])
+
+  const decrementDice = useCallback((index: number) => {
+    setDice(prevDice => {
+      const newDice: DiceHand = [...prevDice]
+      newDice[index] = (prevDice[index] - 1) as DiceValue
+      return newDice
+    })
+  }, [])
+
+  return (
+    <div className="space-y-4">
+      {/* 족보 설명 */}
+      <div className="text-center bg-gray-50 p-3 rounded-lg text-sm font-medium text-gray-700">{description}</div>
+
+      <div className="space-y-4">
+        {/* 주사위 입력 */}
+        <div className="grid grid-cols-5 gap-2">
+          {dice.map((value, index) => (
+            <div className="text-center" key={index}>
+              <div className="flex flex-col gap-1">
+                <Button
+                  className="h-8 w-full p-0"
+                  disabled={value >= 6}
+                  onClick={() => incrementDice(index)}
+                  size="sm"
+                  variant="outline"
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+                <div className="flex items-center justify-center h-16 border-2 border-gray-300 rounded-lg bg-white">
+                  <DiceIcon value={value} />
+                </div>
+                <Button
+                  className="h-8 w-full p-0"
+                  disabled={value <= 1}
+                  onClick={() => decrementDice(index)}
+                  size="sm"
+                  variant="outline"
+                >
+                  <Minus className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* 계산된 점수 표시 */}
+        <div className="bg-blue-50 p-4 rounded-lg text-center border border-blue-200">
+          <div className="text-sm text-blue-600 mb-1 font-medium">계산된 점수</div>
+          <div className="text-3xl font-bold text-blue-700">{calculatedScore}점</div>
+        </div>
+      </div>
+
+      {/* 제출 버튼 */}
+      <div className="flex gap-2 w-full">
+        <Button className="h-12 text-lg font-bold" onClick={() => onScoreSubmit(0)} variant="outline">
+          포기하기 (0점)
+        </Button>
+        <Button className="flex-1 h-12 text-lg font-bold" onClick={() => onScoreSubmit(calculatedScore)}>
+          <Target className="h-5 w-5 mr-2" />
+          점수 제출하기
+        </Button>
+      </div>
+    </div>
   )
 }
