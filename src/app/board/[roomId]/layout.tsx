@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { adminDb } from '@/lib/firebase-admin'
+import { GameRoom } from '@/types/game'
 
 // 동적 메타데이터 생성
 export async function generateMetadata({ params }: { params: Promise<{ roomId: string }> }): Promise<Metadata> {
@@ -22,13 +23,13 @@ export async function generateMetadata({ params }: { params: Promise<{ roomId: s
     // Firebase Admin SDK로 방 정보 가져오기
     const roomDoc = await adminDb.collection('gameRooms').doc(roomId.trim()).get()
 
-    if (roomDoc.exists) {
-      const roomData = roomDoc.data()
-      const roomName = roomData?.name || '게임방'
-      const status = roomData?.status || 'waiting'
-      const playerCount = roomData?.players?.length || 0
-      const currentRound = roomData?.currentRound || 1
-      const maxRounds = roomData?.maxRounds || 12
+    let roomData: GameRoom | undefined
+    if (roomDoc.exists && (roomData = roomDoc.data() as GameRoom)) {
+      const roomName = roomData.name
+      const status = roomData.status
+      const playerCount = roomData.players.length
+      const currentRound = roomData.currentRound
+      const maxRounds = roomData.maxRounds
 
       let title = `${roomName} 전광판`
       let description = `${roomName}의 Yacht Dice 점수를 실시간으로 확인하세요.`

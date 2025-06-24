@@ -1,7 +1,7 @@
 import { collection, doc, addDoc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore'
 import { useCallback, useState } from 'react'
 
-import { MAX_ROUNDS } from '@/constants/game'
+import { MAX_ROUNDS, MAX_ROUNDS_WITH_THREE_OF_A_KIND_EXTENDED_RULE } from '@/constants/game'
 import { db } from '@/lib/firebase'
 import { GameRoom, Player, ExtendedRules, DEFAULT_EXTENDED_RULES } from '@/types/game'
 
@@ -31,7 +31,7 @@ export function useGameRoomActions() {
           players: [],
           currentPlayerIndex: 0,
           currentRound: 1,
-          maxRounds: MAX_ROUNDS,
+          maxRounds: extendedRules.enableThreeOfAKind ? MAX_ROUNDS_WITH_THREE_OF_A_KIND_EXTENDED_RULE : MAX_ROUNDS,
           extendedRules,
           status: 'waiting',
           createdAt: Date.now(),

@@ -1,5 +1,5 @@
 import { doc, updateDoc, getDoc } from 'firebase/firestore'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { db } from '@/lib/firebase'
 import { GameRoom, Player, ScoreCategory } from '@/types/game'
@@ -22,7 +22,7 @@ export function useGamePlay() {
   const [error, setError] = useState<null | string>(null)
 
   // 게임 시작
-  const startGame = async (roomId: string): Promise<void> => {
+  const startGame = useCallback(async (roomId: string): Promise<void> => {
     setLoading(true)
     setError(null)
 
@@ -52,78 +52,76 @@ export function useGamePlay() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   // 점수 입력
-  const updateScore = async (
-    roomId: string,
-    playerId: string,
-    category: ScoreCategory,
-    score: number,
-  ): Promise<void> => {
-    setLoading(true)
-    setError(null)
+  const updateScore = useCallback(
+    async (roomId: string, playerId: string, category: ScoreCategory, score: number): Promise<void> => {
+      setLoading(true)
+      setError(null)
 
-    try {
-      const roomRef = doc(db, 'gameRooms', roomId)
-      const roomDoc = await getDoc(roomRef)
+      try {
+        const roomRef = doc(db, 'gameRooms', roomId)
+        const roomDoc = await getDoc(roomRef)
 
-      if (!roomDoc.exists()) {
-        throw new Error('존재하지 않는 방입니다.')
+        if (!roomDoc.exists()) {
+          throw new Error('존재하지 않는 방입니다.')
+        }
+
+        const room = roomDoc.data() as GameRoom
+        const playerIndex = room.players.findIndex(p => p.id === playerId)
+
+        if (playerIndex === -1) {
+          throw new Error('존재하지 않는 플레이어입니다.')
+        }
+
+        // 이미 점수가 입력된 카테고리인지 확인
+        if (room.players[playerIndex].scores[category] !== undefined) {
+          throw new Error('이미 점수가 입력된 카테고리입니다.')
+        }
+
+        const updatedPlayers = [...room.players]
+        updatedPlayers[playerIndex].scores[category] = score
+
+        // 다음 플레이어로 턴 넘기기
+        let nextPlayerIndex = room.currentPlayerIndex
+        let nextRound = room.currentRound
+
+        // 모든 플레이어가 이번 라운드를 완료했는지 확인
+        const allPlayersCompletedRound = updatedPlayers.every(
+          player => Object.keys(player.scores).length >= room.currentRound,
+        )
+
+        if (allPlayersCompletedRound && room.currentRound < room.maxRounds) {
+          nextRound += 1
+          nextPlayerIndex = 0
+        } else {
+          nextPlayerIndex = (room.currentPlayerIndex + 1) % room.players.length
+        }
+
+        // 게임 종료 조건 확인
+        const gameStatus = room.currentRound >= room.maxRounds && allPlayersCompletedRound ? 'finished' : 'playing'
+
+        await updateDoc(roomRef, {
+          players: updatedPlayers,
+          currentPlayerIndex: nextPlayerIndex,
+          currentRound: nextRound,
+          status: gameStatus,
+          updatedAt: Date.now(),
+        })
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : '점수 입력에 실패했습니다.'
+        setError(errorMessage)
+        throw new Error(errorMessage)
+      } finally {
+        setLoading(false)
       }
-
-      const room = roomDoc.data() as GameRoom
-      const playerIndex = room.players.findIndex(p => p.id === playerId)
-
-      if (playerIndex === -1) {
-        throw new Error('존재하지 않는 플레이어입니다.')
-      }
-
-      // 이미 점수가 입력된 카테고리인지 확인
-      if (room.players[playerIndex].scores[category] !== undefined) {
-        throw new Error('이미 점수가 입력된 카테고리입니다.')
-      }
-
-      const updatedPlayers = [...room.players]
-      updatedPlayers[playerIndex].scores[category] = score
-
-      // 다음 플레이어로 턴 넘기기
-      let nextPlayerIndex = room.currentPlayerIndex
-      let nextRound = room.currentRound
-
-      // 모든 플레이어가 이번 라운드를 완료했는지 확인
-      const allPlayersCompletedRound = updatedPlayers.every(
-        player => Object.keys(player.scores).length >= room.currentRound,
-      )
-
-      if (allPlayersCompletedRound && room.currentRound < room.maxRounds) {
-        nextRound += 1
-        nextPlayerIndex = 0
-      } else {
-        nextPlayerIndex = (room.currentPlayerIndex + 1) % room.players.length
-      }
-
-      // 게임 종료 조건 확인
-      const gameStatus = room.currentRound >= room.maxRounds && allPlayersCompletedRound ? 'finished' : 'playing'
-
-      await updateDoc(roomRef, {
-        players: updatedPlayers,
-        currentPlayerIndex: nextPlayerIndex,
-        currentRound: nextRound,
-        status: gameStatus,
-        updatedAt: Date.now(),
-      })
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '점수 입력에 실패했습니다.'
-      setError(errorMessage)
-      throw new Error(errorMessage)
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    [],
+  )
 
   // 게임 재시작
-  const restartGame = async (roomId: string): Promise<void> => {
+  const restartGame = useCallback(async (roomId: string): Promise<void> => {
     setLoading(true)
     setError(null)
 
@@ -159,7 +157,7 @@ export function useGamePlay() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   return {
     loading,

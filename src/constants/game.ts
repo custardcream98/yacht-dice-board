@@ -4,6 +4,7 @@ import { ScoreCategory } from '@/types/game'
 
 // 게임 라운드 수
 export const MAX_ROUNDS = 12
+export const MAX_ROUNDS_WITH_THREE_OF_A_KIND_EXTENDED_RULE = 13
 
 // 상위 섹션 보너스 기준 점수
 export const UPPER_BONUS_THRESHOLD = 63
