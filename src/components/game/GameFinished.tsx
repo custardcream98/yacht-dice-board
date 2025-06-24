@@ -2,28 +2,20 @@ import { Crown, Trophy, Medal, Target, TrendingUp, RotateCcw, AlertTriangle } fr
 import Link from 'next/link'
 import { useState } from 'react'
 
+import { ExtendedRuleCheckboxes } from '@/components/game/ExtendedRuleCheckboxes'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { getPlayerRankings, YachtDiceCalculator } from '@/lib/yacht-dice-rules'
-import { GameRoom, Player } from '@/types/game'
+import { ExtendedRules, GameRoom, Player } from '@/types/game'
 
 interface GameFinishedProps {
   gameRoom: GameRoom
   myPlayer: Player
-  onRestartGame: () => void
+  onRestartGame: ({ extendedRules }: { extendedRules: ExtendedRules }) => Promise<void>
 }
 
 export function GameFinished({ gameRoom, myPlayer, onRestartGame }: GameFinishedProps) {
-  const [isRestartDialogOpen, setIsRestartDialogOpen] = useState(false)
-
-  const handleRestartGame = () => {
-    if (onRestartGame) {
-      onRestartGame()
-      setIsRestartDialogOpen(false)
-    }
-  }
-
   const rankings = getPlayerRankings(gameRoom)
   const myRankingData = rankings.find(p => p.player.name === myPlayer.name)
   const myRanking = myRankingData?.ranking || 0
@@ -167,8 +159,6 @@ export function GameFinished({ gameRoom, myPlayer, onRestartGame }: GameFinished
               </div>
             )}
 
-            <p className="text-lg mb-4">🎉 모든 플레이어가 게임을 완료했습니다! 🎉</p>
-
             <div className="space-y-3">
               <Button asChild className="w-full h-12 text-lg font-bold">
                 <Link href={`/board/${gameRoom.id}`}>
@@ -176,42 +166,71 @@ export function GameFinished({ gameRoom, myPlayer, onRestartGame }: GameFinished
                   전광판에서 전체 결과 보기
                 </Link>
               </Button>
-
-              <Dialog onOpenChange={setIsRestartDialogOpen} open={isRestartDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="w-full h-12 text-lg font-bold" variant="outline">
-                    <RotateCcw className="h-5 w-5 mr-2" />새 게임 시작하기
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="w-[95vw] max-w-md">
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5 text-orange-500" />
-                      게임 재시작 확인
-                    </DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <p className="text-lg mb-2">정말로 새 게임을 시작하시겠습니까?</p>
-                      <p className="text-sm text-gray-600 mb-4">
-                        현재 게임의 모든 점수가 초기화되고, 새로운 순서로 게임이 시작됩니다.
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button className="flex-1" onClick={() => setIsRestartDialogOpen(false)} variant="outline">
-                        취소
-                      </Button>
-                      <Button className="flex-1" onClick={handleRestartGame}>
-                        <RotateCcw className="h-4 w-4 mr-2" />새 게임 시작
-                      </Button>
-                    </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <RestartGameDialog onRestartGame={onRestartGame} prevExtendedRules={gameRoom.extendedRules} />
             </div>
           </div>
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+const RestartGameDialog = ({
+  prevExtendedRules,
+  onRestartGame,
+}: {
+  prevExtendedRules: ExtendedRules
+  onRestartGame: ({ extendedRules }: { extendedRules: ExtendedRules }) => Promise<void>
+}) => {
+  const [isRestartDialogOpen, setIsRestartDialogOpen] = useState(false)
+  const [extendedRules, setExtendedRules] = useState<ExtendedRules>(prevExtendedRules)
+
+  const [isRestarting, setIsRestarting] = useState(false)
+  const handleRestartGame = async () => {
+    setIsRestarting(true)
+    await onRestartGame({ extendedRules })
+    setIsRestartDialogOpen(false)
+    setIsRestarting(false)
+  }
+
+  return (
+    <Dialog onOpenChange={setIsRestartDialogOpen} open={isRestartDialogOpen}>
+      <DialogTrigger asChild>
+        <Button className="w-full h-12 text-lg font-bold" variant="outline">
+          <RotateCcw className="h-5 w-5 mr-2" />새 게임 시작하기
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="w-[95vw] max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-orange-500" />
+            게임 재시작 확인
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-lg mb-2">정말로 새 게임을 시작하시겠습니까?</p>
+          <p className="text-sm text-gray-600 mb-4">
+            현재 게임의 모든 점수가 초기화되고, 새로운 순서로 게임이 시작됩니다.
+          </p>
+          <ExtendedRuleCheckboxes
+            extendedRules={extendedRules}
+            handleRuleChange={(rule, value) => setExtendedRules(prev => ({ ...prev, [rule]: value }))}
+          />
+          <div className="flex gap-2">
+            <Button
+              className="flex-1"
+              disabled={isRestarting}
+              onClick={() => setIsRestartDialogOpen(false)}
+              variant="outline"
+            >
+              취소
+            </Button>
+            <Button className="flex-1" disabled={isRestarting} onClick={handleRestartGame}>
+              <RotateCcw className="h-4 w-4 mr-2" />새 게임 시작
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
