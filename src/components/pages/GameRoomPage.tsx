@@ -122,13 +122,7 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
 
         {/* 하단 정보 */}
         <div className="text-center text-sm text-gray-500 pb-4">
-          <p>
-            방 ID: <span className="font-mono font-bold">{gameRoom.id}</span>
-          </p>
-          <p className="mt-1">
-            플레이어: <span className="font-bold">{myPlayer.name}</span>
-          </p>
-          <p className="mt-1">Yacht Dice 모바일 게임</p>
+          방 ID: <span className="font-mono font-bold">{gameRoom.id}</span>
         </div>
       </div>
     </div>
