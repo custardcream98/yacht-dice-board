@@ -285,16 +285,16 @@ const UpperSectionInput = ({
 
       {/* 제출 버튼 */}
       <div className="flex gap-2 w-full">
-        <Button className="h-12 text-lg font-bold" onClick={() => onScoreSubmit(0)} variant="outline">
-          0점 제출하기
+        <Button className="h-12 text-base xs:text-lg font-bold" onClick={() => onScoreSubmit(0)} variant="outline">
+          포기 (0점)
         </Button>
         <Button
-          className="flex-1 h-12 text-lg font-bold"
+          className="flex-1 h-12 text-base xs:text-lg font-bold"
           disabled={diceCount === 0}
           onClick={() => onScoreSubmit(calculatedScore)}
         >
           <Target className="h-5 w-5 mr-1" />
-          점수 제출하기
+          제출하기 ({calculatedScore}점)
         </Button>
       </div>
     </div>
@@ -476,14 +476,14 @@ const YesNoInput = ({
       {/* 버튼 */}
       <div className="flex gap-3 w-full">
         <Button
-          className="h-14 text-lg font-bold bg-gray-100 hover:bg-gray-200 text-gray-700"
+          className="h-14 text-base xs:text-lg font-bold bg-gray-100 hover:bg-gray-200 text-gray-700"
           onClick={() => onScoreSubmit(0)}
           variant="outline"
         >
-          포기하기 (0점)
+          포기 (0점)
         </Button>
         <Button
-          className="flex-1 h-14 text-lg font-bold bg-green-600 hover:bg-green-700"
+          className="flex-1 h-14 text-base xs:text-lg font-bold bg-green-600 hover:bg-green-700"
           onClick={() => onScoreSubmit(score)}
         >
           <Target className="h-5 w-5 mr-2" />
@@ -512,14 +512,14 @@ const YachtYesNoInput = ({ onScoreSubmit }: { onScoreSubmit: (score: number) => 
       {/* 버튼 */}
       <div className="flex gap-3">
         <Button
-          className="flex-1 h-14 text-lg font-bold bg-gray-100 hover:bg-gray-200 text-gray-700"
+          className="flex-1 h-14 text-base xs:text-lg font-bold bg-gray-100 hover:bg-gray-200 text-gray-700"
           onClick={() => onScoreSubmit(0)}
           variant="outline"
         >
-          아니요 (0점)
+          포기 (0점)
         </Button>
         <Button
-          className="flex-1 h-14 text-lg font-bold bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg"
+          className="flex-1 h-14 text-base xs:text-lg font-bold bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg"
           onClick={() => onScoreSubmit(FIXED_SCORE_CATEGORIES.yacht)}
         >
           <Target className="h-5 w-5 mr-2" />
@@ -571,7 +571,7 @@ function DiceInput({
             ))}
           </div>
 
-          <div className="bg-gray-50 p-2 rounded-lg border border-gray-200 max-w-xs mx-auto">
+          <div className="bg-gray-50 p-2 rounded-lg border border-gray-200 max-w-xs mx-auto w-fit">
             <div className="grid grid-cols-[10px_repeat(6,1fr)] gap-[6px] items-center">
               {/* 주사위 선택 행들 */}
               {dice.map((selectedValue, diceIndex) => (
@@ -580,7 +580,7 @@ function DiceInput({
                   {ALL_DICE_VALUES.map(diceValue => (
                     <button
                       className={cn(
-                        'aspect-square w-full h-full flex items-center justify-center border rounded-lg transition-all duration-100',
+                        'aspect-square w-full h-full flex items-center justify-center border rounded-lg transition-all duration-100 p-1',
                         'active:scale-95',
                         selectedValue === diceValue
                           ? 'bg-blue-500 border-blue-600 text-white shadow-sm'
@@ -608,12 +608,12 @@ function DiceInput({
 
       {/* 제출 버튼 */}
       <div className="flex gap-2 w-full">
-        <Button className="h-12 text-lg font-bold" onClick={() => onScoreSubmit(0)} variant="outline">
-          포기하기 (0점)
+        <Button className="h-12 text-base xs:text-lg font-bold" onClick={() => onScoreSubmit(0)} variant="outline">
+          포기 (0점)
         </Button>
-        <Button className="flex-1 h-12 text-lg font-bold" onClick={() => onScoreSubmit(calculatedScore)}>
+        <Button className="flex-1 h-12 text-base xs:text-lg font-bold" onClick={() => onScoreSubmit(calculatedScore)}>
           <Target className="h-5 w-5 mr-2" />
-          점수 제출하기
+          제출하기 ({calculatedScore}점)
         </Button>
       </div>
     </div>
