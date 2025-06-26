@@ -9,7 +9,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { ValueConsumer } from '@/components/ValueConsumer'
 import { useGamePlay, useGameRoomActions, useGameRoomData } from '@/hooks'
 import { exhaustiveCheck } from '@/lib/types'
-import { ScoreCategory } from '@/types/game'
+import { ExtendedRules, ScoreCategory } from '@/types/game'
 
 export default function GameRoomPage({ roomId, playerName }: { roomId: string; playerName: string }) {
   const router = useRouter()
@@ -52,9 +52,9 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
   }
 
   // 게임 재시작 핸들러
-  const handleRestartGame = async () => {
+  const handleRestartGame = async ({ extendedRules }: { extendedRules: ExtendedRules }) => {
     try {
-      await restartGame(roomId)
+      await restartGame({ roomId, extendedRules })
     } catch (err) {
       alert(err instanceof Error ? err.message : '게임 재시작에 실패했습니다.')
     }

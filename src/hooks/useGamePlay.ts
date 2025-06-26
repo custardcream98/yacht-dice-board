@@ -2,7 +2,7 @@ import { doc, updateDoc, getDoc } from 'firebase/firestore'
 import { useCallback, useState } from 'react'
 
 import { db } from '@/lib/firebase'
-import { GameRoom, Player, ScoreCategory } from '@/types/game'
+import { ExtendedRules, GameRoom, Player, ScoreCategory } from '@/types/game'
 
 const shufflePlayers = (players: Player[]) => {
   const shuffledPlayers = [...players]
@@ -121,43 +121,47 @@ export function useGamePlay() {
   )
 
   // 게임 재시작
-  const restartGame = useCallback(async (roomId: string): Promise<void> => {
-    setLoading(true)
-    setError(null)
+  const restartGame = useCallback(
+    async ({ roomId, extendedRules }: { roomId: string; extendedRules: ExtendedRules }): Promise<void> => {
+      setLoading(true)
+      setError(null)
 
-    try {
-      const roomRef = doc(db, 'gameRooms', roomId)
-      const roomDoc = await getDoc(roomRef)
+      try {
+        const roomRef = doc(db, 'gameRooms', roomId)
+        const roomDoc = await getDoc(roomRef)
 
-      if (!roomDoc.exists()) {
-        throw new Error('존재하지 않는 방입니다.')
+        if (!roomDoc.exists()) {
+          throw new Error('존재하지 않는 방입니다.')
+        }
+
+        const room = roomDoc.data() as GameRoom
+
+        // 모든 플레이어의 점수 초기화
+        const resetPlayers = shufflePlayers(
+          room.players.map(player => ({
+            ...player,
+            scores: {},
+          })),
+        )
+
+        await updateDoc(roomRef, {
+          players: resetPlayers,
+          extendedRules,
+          status: 'playing',
+          currentPlayerIndex: 0,
+          currentRound: 1,
+          updatedAt: Date.now(),
+        })
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : '게임 재시작에 실패했습니다.'
+        setError(errorMessage)
+        throw new Error(errorMessage)
+      } finally {
+        setLoading(false)
       }
-
-      const room = roomDoc.data() as GameRoom
-
-      // 모든 플레이어의 점수 초기화
-      const resetPlayers = shufflePlayers(
-        room.players.map(player => ({
-          ...player,
-          scores: {},
-        })),
-      )
-
-      await updateDoc(roomRef, {
-        players: resetPlayers,
-        status: 'playing',
-        currentPlayerIndex: 0,
-        currentRound: 1,
-        updatedAt: Date.now(),
-      })
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '게임 재시작에 실패했습니다.'
-      setError(errorMessage)
-      throw new Error(errorMessage)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+    },
+    [],
+  )
 
   return {
     loading,
