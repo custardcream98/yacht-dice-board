@@ -117,7 +117,7 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
 
       <div className="relative z-10 container mx-auto flex max-w-7xl flex-1 flex-col">
         {/* 헤더 */}
-        <div className={cn('text-center', !isFullscreen && 'mb-8')}>
+        <div className={cn('text-center', isFullscreen ? 'mb-2' : 'mb-8')}>
           <div className={cn('flex items-center justify-center gap-3', isFullscreen ? 'mb-1' : 'mb-4')}>
             <h1 className={cn('font-bold text-white', isFullscreen ? 'text-2xl' : 'text-5xl')}>{gameRoom.name}</h1>
           </div>
@@ -128,7 +128,6 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
               isFullscreen ? 'text-xs' : 'text-sm',
             )}
           >
-            <div className="flex items-center gap-1">
               <Badge
                 className={cn(
                   'border-0 font-medium shadow-lg backdrop-blur-sm',
@@ -144,7 +143,6 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
                 {gameRoom.status === 'playing' && '🎮 게임 진행 중'}
                 {gameRoom.status === 'finished' && '🏆 게임 종료'}
               </Badge>
-            </div>
 
             {gameRoom.status === 'playing' && (
               <div className="flex items-center gap-2">
@@ -264,12 +262,12 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
 
         {/* 점수판 */}
         <div className="mt-auto mb-auto overflow-x-auto rounded-2xl border-2 border-white/20 bg-white shadow-2xl">
-          <Table className={isFullscreen ? 'text-base' : 'text-sm'}>
+          <Table>
             <TableHeader>
               <TableRow className="border-b-2 border-slate-200 bg-gradient-to-r from-slate-100/80 to-gray-100/80 backdrop-blur-sm">
                 <TableHead className="font-bold text-slate-700" />
                 {gameRoom.players.map(player => (
-                  <TableHead className={`text-center ${isFullscreen ? 'min-w-32' : 'min-w-24'}`} key={player.id}>
+                  <TableHead className={cn(`text-center`, isFullscreen ? 'min-w-32' : 'min-w-24')} key={player.id}>
                     <div className={cn('space-y-1', isFullscreen ? 'py-1' : 'py-2')}>
                       <div className={cn('font-bold text-slate-800', isFullscreen ? 'text-sm' : 'text-base')}>
                         {player.name}
