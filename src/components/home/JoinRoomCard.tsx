@@ -50,8 +50,9 @@ const RoomIdInput = ({
       <Input
         className="font-mono"
         id={id}
+        maxLength={50}
         onChange={e => onJoinRoomIdChange(e.target.value)}
-        placeholder="방 ID를 입력하세요 "
+        placeholder="방 ID를 입력하세요"
         value={joinRoomId}
       />
     </div>

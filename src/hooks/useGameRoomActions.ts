@@ -88,6 +88,10 @@ export function useGameRoomActions() {
         throw new Error('이미 존재하는 플레이어 이름입니다.')
       }
 
+      if (room.players.length >= 10) {
+        throw new Error('방에 최대 10명까지 참여할 수 있습니다.')
+      }
+
       const newPlayer: Player = {
         id: `player_${Date.now()}`,
         name: playerName,
