@@ -56,7 +56,17 @@ export function useGamePlay() {
 
   // 점수 입력
   const updateScore = useCallback(
-    async (roomId: string, playerId: string, category: ScoreCategory, score: number): Promise<void> => {
+    async ({
+      roomId,
+      playerId,
+      category,
+      score,
+    }: {
+      roomId: string
+      playerId: string
+      category: ScoreCategory
+      score: number
+    }): Promise<void> => {
       setLoading(true)
       setError(null)
 

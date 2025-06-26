@@ -30,7 +30,7 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
     if (!gameRoom || !myPlayer) return
 
     try {
-      await updateScore(roomId, myPlayer.id, category, score)
+      await updateScore({ roomId, playerId: myPlayer.id, category, score })
     } catch (err) {
       alert(err instanceof Error ? err.message : '점수 입력에 실패했습니다.')
     }
