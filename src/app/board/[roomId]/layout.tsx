@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { adminDb } from '@/lib/firebase-admin'
+import { adminDb } from '@/lib/firebase/client/firebase-admin'
 import { GameRoom } from '@/types/game'
 
 // 동적 메타데이터 생성

@@ -10,21 +10,30 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { useGameRoomData, useGameRoomActions } from '@/hooks'
+import { useAsyncHandler } from '@/hooks/useAsyncHandler'
+import { useGameRoomData } from '@/hooks/useGameRoomData'
+import { FirebaseCustomError } from '@/lib/firebase/error'
+import { isJoinRoomErrorCode, JOIN_ROOM_ERROR_CODES, roomActions } from '@/lib/firebase/room'
 
 interface InvitePageProps {
   roomId: string
 }
+
+const JOIN_ROOM_ERROR_MESSAGES = {
+  [JOIN_ROOM_ERROR_CODES.ROOM_NOT_FOUND]: '존재하지 않는 방입니다.',
+  [JOIN_ROOM_ERROR_CODES.ROOM_ALREADY_STARTED]: '이미 시작된 게임입니다.',
+  [JOIN_ROOM_ERROR_CODES.PLAYER_NAME_ALREADY_EXISTS]: '이미 존재하는 플레이어 이름입니다.',
+  [JOIN_ROOM_ERROR_CODES.MAX_PLAYERS_REACHED]: '방에 최대 10명까지 참여할 수 있습니다.',
+} as const
 
 export default function InvitePage({ roomId }: InvitePageProps) {
   const router = useRouter()
   const [isRouterPushPending, startTransition] = useTransition()
   const [playerName, setPlayerName] = useState('')
   const name = playerName.trim()
-  const [isJoining, setIsJoining] = useState(false)
 
   const { gameRoom } = useGameRoomData(roomId)
-  const { joinRoom } = useGameRoomActions()
+  const { handleAsync: joinRoom, isPending: isJoinRoomPending } = useAsyncHandler(roomActions.joinRoom)
 
   const nameFormId = useId()
 
@@ -38,16 +47,17 @@ export default function InvitePage({ roomId }: InvitePageProps) {
         return
       }
 
-      setIsJoining(true)
       try {
-        await joinRoom(roomId, name)
+        await joinRoom({ roomId, playerName: name })
         startTransition(() => {
           router.push(`/room/${roomId}?player=${encodeURIComponent(name)}`)
         })
       } catch (error) {
-        alert(error instanceof Error ? error.message : '방 참여에 실패했습니다.')
-      } finally {
-        setIsJoining(false)
+        alert(
+          error instanceof FirebaseCustomError && isJoinRoomErrorCode(error.code)
+            ? JOIN_ROOM_ERROR_MESSAGES[error.code]
+            : '방 참여에 실패했습니다.',
+        )
       }
     },
     [name, joinRoom, roomId, router],
@@ -155,7 +165,7 @@ export default function InvitePage({ roomId }: InvitePageProps) {
               </label>
               <Input
                 className="text-center text-lg font-medium"
-                disabled={isJoining}
+                disabled={isJoinRoomPending}
                 id="playerName"
                 maxLength={20}
                 onChange={e => setPlayerName(e.target.value)}
@@ -166,12 +176,12 @@ export default function InvitePage({ roomId }: InvitePageProps) {
 
             <Button
               className="h-12 w-full text-lg font-bold"
-              disabled={isJoining || isRouterPushPending || !name}
+              disabled={isJoinRoomPending || isRouterPushPending || !name}
               form={nameFormId}
               type="submit"
             >
               <Users className="mr-2 h-5 w-5" />
-              {isJoining || isRouterPushPending
+              {isJoinRoomPending || isRouterPushPending
                 ? '참여 중...'
                 : gameRoom.players.length === 0
                   ? '방장으로 시작하기'

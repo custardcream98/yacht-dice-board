@@ -3,11 +3,13 @@
 import { ArrowLeft, Share2, Trash2, AlertTriangle, Users, ExternalLink, Monitor, UserPlus, Lock } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { useAsyncHandler } from '@/hooks/useAsyncHandler'
+import { roomActions } from '@/lib/firebase/room'
 import { cn } from '@/lib/utils'
 import { GameRoom, Player } from '@/types/game'
 
@@ -18,14 +20,12 @@ interface GameHeaderProps {
   gameRoom: GameRoom
   isMyTurn?: boolean
   myPlayer: Player
-  onDeleteRoom: () => Promise<void>
 }
 
-export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDeleteRoom }: GameHeaderProps) {
+export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn }: GameHeaderProps) {
   const router = useRouter()
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
 
   // 스크롤 감지
@@ -43,16 +43,19 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
   const inviteUrl = `${baseUrl}/invite/${gameRoom.id}`
   const boardUrl = `${baseUrl}/board/${gameRoom.id}`
 
+  const { handleAsync: deleteRoom, isPending: isDeleteRoomPending } = useAsyncHandler(roomActions.deleteRoom)
+  const [isRouterPushPending, startTransition] = useTransition()
+
   const handleDeleteRoom = async () => {
-    setIsDeleting(true)
     try {
-      await onDeleteRoom()
+      await deleteRoom(gameRoom.id)
       setIsDeleteDialogOpen(false)
-      router.push('/')
+      startTransition(() => {
+        router.push('/')
+      })
+      alert('방이 성공적으로 삭제되었습니다.')
     } catch (error) {
       alert(error instanceof Error ? error.message : '방 삭제에 실패했습니다.')
-    } finally {
-      setIsDeleting(false)
     }
   }
 
@@ -143,10 +146,19 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button className="flex-1" disabled={isDeleting} onClick={handleDeleteRoom} variant="destructive">
-                        {isDeleting ? '삭제 중...' : '영구 삭제'}
+                      <Button
+                        className="flex-1"
+                        disabled={isDeleteRoomPending || isRouterPushPending}
+                        onClick={handleDeleteRoom}
+                        variant="destructive"
+                      >
+                        {isDeleteRoomPending || isRouterPushPending ? '삭제 중...' : '영구 삭제'}
                       </Button>
-                      <Button disabled={isDeleting} onClick={() => setIsDeleteDialogOpen(false)} variant="outline">
+                      <Button
+                        disabled={isDeleteRoomPending || isRouterPushPending}
+                        onClick={() => setIsDeleteDialogOpen(false)}
+                        variant="outline"
+                      >
                         취소
                       </Button>
                     </div>

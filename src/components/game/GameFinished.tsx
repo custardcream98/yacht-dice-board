@@ -1,3 +1,5 @@
+'use client'
+
 import { Crown, Trophy, Medal, Target, TrendingUp, RotateCcw, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -6,16 +8,22 @@ import { ExtendedRuleCheckboxes } from '@/components/game/ExtendedRuleCheckboxes
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { useAsyncHandler } from '@/hooks/useAsyncHandler'
+import { FirebaseCustomError } from '@/lib/firebase/error'
+import { gameActions, isRestartGameErrorCode, RESTART_GAME_ERROR_CODES } from '@/lib/firebase/game'
 import { getPlayerRankings, YachtDiceCalculator } from '@/lib/yacht-dice-rules'
 import { ExtendedRules, GameRoom, Player } from '@/types/game'
 
 interface GameFinishedProps {
   gameRoom: GameRoom
   myPlayer: Player
-  onRestartGame: ({ extendedRules }: { extendedRules: ExtendedRules }) => Promise<void>
 }
 
-export function GameFinished({ gameRoom, myPlayer, onRestartGame }: GameFinishedProps) {
+const RESTART_GAME_ERROR_MESSAGES = {
+  [RESTART_GAME_ERROR_CODES.ROOM_NOT_FOUND]: '존재하지 않는 방입니다.',
+} as const
+
+export function GameFinished({ gameRoom, myPlayer }: GameFinishedProps) {
   const rankings = getPlayerRankings(gameRoom)
   const myRankingData = rankings.find(p => p.player.name === myPlayer.name)
   const myRanking = myRankingData?.ranking || 0
@@ -166,7 +174,7 @@ export function GameFinished({ gameRoom, myPlayer, onRestartGame }: GameFinished
                   전광판에서 전체 결과 보기
                 </Link>
               </Button>
-              <RestartGameDialog onRestartGame={onRestartGame} prevExtendedRules={gameRoom.extendedRules} />
+              <RestartGameDialog prevExtendedRules={gameRoom.extendedRules} roomId={gameRoom.id} />
             </div>
           </div>
         </CardContent>
@@ -175,22 +183,23 @@ export function GameFinished({ gameRoom, myPlayer, onRestartGame }: GameFinished
   )
 }
 
-const RestartGameDialog = ({
-  prevExtendedRules,
-  onRestartGame,
-}: {
-  prevExtendedRules: ExtendedRules
-  onRestartGame: ({ extendedRules }: { extendedRules: ExtendedRules }) => Promise<void>
-}) => {
+const RestartGameDialog = ({ prevExtendedRules, roomId }: { prevExtendedRules: ExtendedRules; roomId: string }) => {
   const [isRestartDialogOpen, setIsRestartDialogOpen] = useState(false)
   const [extendedRules, setExtendedRules] = useState<ExtendedRules>(prevExtendedRules)
 
-  const [isRestarting, setIsRestarting] = useState(false)
+  const { handleAsync: restartGame, isPending: isRestartGamePending } = useAsyncHandler(gameActions.restartGame)
+
   const handleRestartGame = async () => {
-    setIsRestarting(true)
-    await onRestartGame({ extendedRules })
-    setIsRestartDialogOpen(false)
-    setIsRestarting(false)
+    try {
+      await restartGame({ roomId, extendedRules })
+      setIsRestartDialogOpen(false)
+    } catch (err) {
+      alert(
+        err instanceof FirebaseCustomError && isRestartGameErrorCode(err.code)
+          ? RESTART_GAME_ERROR_MESSAGES[err.code]
+          : '게임 재시작에 실패했습니다.',
+      )
+    }
   }
 
   return (
@@ -219,13 +228,13 @@ const RestartGameDialog = ({
           <div className="flex gap-2">
             <Button
               className="flex-1"
-              disabled={isRestarting}
+              disabled={isRestartGamePending}
               onClick={() => setIsRestartDialogOpen(false)}
               variant="outline"
             >
               취소
             </Button>
-            <Button className="flex-1" disabled={isRestarting} onClick={handleRestartGame}>
+            <Button className="flex-1" disabled={isRestartGamePending} onClick={handleRestartGame}>
               <RotateCcw className="mr-2 h-4 w-4" />새 게임 시작
             </Button>
           </div>

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { adminDb } from '@/lib/firebase-admin'
+import { adminDb } from '@/lib/firebase/client/firebase-admin'
 
 // 동적 메타데이터 생성
 export async function generateMetadata({ params }: { params: Promise<{ roomId: string }> }): Promise<Metadata> {

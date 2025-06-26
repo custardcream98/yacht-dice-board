@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { adminDb } from '@/lib/firebase-admin'
+import { adminDb } from '@/lib/firebase/client/firebase-admin'
 
 const DEFAULT_METADATA = {
   title: 'Yacht Dice 초대링크',

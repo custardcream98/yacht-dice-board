@@ -12,6 +12,9 @@ import {
   UPPER_SECTION_DICE_COUNT,
   FIXED_SCORE_CATEGORIES,
 } from '@/constants/game'
+import { useAsyncHandler } from '@/hooks/useAsyncHandler'
+import { FirebaseCustomError } from '@/lib/firebase/error'
+import { gameActions, isSubmitScoreErrorCode, SUBMIT_SCORE_ERROR_CODES } from '@/lib/firebase/game'
 import { exhaustiveCheck } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { YachtDiceCalculator, CATEGORY_NAMES } from '@/lib/yacht-dice-rules'
@@ -27,10 +30,30 @@ interface ScoreInputProps {
   extendedRules: ExtendedRules
   isMyTurn: boolean
   myPlayer: Player
-  onScoreSubmit: (category: ScoreCategory, score: number) => void
+  roomId: string
 }
 
-export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }: ScoreInputProps) {
+const SUBMIT_SCORE_ERROR_MESSAGES = {
+  [SUBMIT_SCORE_ERROR_CODES.ROOM_NOT_FOUND]: '존재하지 않는 방입니다.',
+  [SUBMIT_SCORE_ERROR_CODES.PLAYER_NOT_FOUND]: '플레이어를 찾을 수 없습니다.',
+  [SUBMIT_SCORE_ERROR_CODES.CATEGORY_ALREADY_SCORED]: '이미 점수가 있습니다.',
+} as const
+
+export function ScoreInput({ extendedRules, myPlayer, isMyTurn, roomId }: ScoreInputProps) {
+  const { handleAsync: submitScore, isPending: isSubmitScorePending } = useAsyncHandler(gameActions.submitScore)
+
+  const handleScoreSubmit = async (category: ScoreCategory, score: number) => {
+    try {
+      await submitScore({ roomId, playerId: myPlayer.id, category, score })
+    } catch (err) {
+      alert(
+        err instanceof FirebaseCustomError && isSubmitScoreErrorCode(err.code)
+          ? SUBMIT_SCORE_ERROR_MESSAGES[err.code]
+          : '점수 입력에 실패했습니다.',
+      )
+    }
+  }
+
   const visibleLowerCategories = useMemo(
     () =>
       LOWER_SECTION_CATEGORIES.filter(category => {
@@ -67,7 +90,7 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
               const isWaitingTurn = !isMyTurn
 
               return (
-                <UpperSectionDialog category={category} key={category} onScoreSubmit={onScoreSubmit}>
+                <UpperSectionDialog category={category} key={category} onScoreSubmit={handleScoreSubmit}>
                   <Button
                     className={cn(
                       'relative flex h-16 flex-col items-center justify-center overflow-hidden p-2',
@@ -77,7 +100,7 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
                           ? 'transform cursor-not-allowed border-blue-300 bg-gradient-to-br from-blue-100 to-blue-200 shadow-md'
                           : 'hover:border-blue-300 hover:bg-blue-50',
                     )}
-                    disabled={isWaitingTurn}
+                    disabled={isWaitingTurn || isSubmitScorePending}
                     onClick={event => {
                       if (isScored) {
                         event.preventDefault()
@@ -127,7 +150,7 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
                   category={category}
                   extendedRules={extendedRules}
                   key={category}
-                  onScoreSubmit={onScoreSubmit}
+                  onScoreSubmit={handleScoreSubmit}
                 >
                   <Button
                     className={cn(
@@ -138,7 +161,7 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
                           ? 'transform cursor-not-allowed border-green-300 bg-gradient-to-br from-green-100 to-green-200 shadow-md'
                           : 'hover:border-green-300 hover:bg-green-50',
                     )}
-                    disabled={isWaitingTurn}
+                    disabled={isWaitingTurn || isSubmitScorePending}
                     onClick={event => {
                       if (isScored) {
                         event.preventDefault()

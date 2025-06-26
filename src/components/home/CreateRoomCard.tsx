@@ -8,17 +8,17 @@ import { ExtendedRuleCheckboxes } from '@/components/game/ExtendedRuleCheckboxes
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { useGameRoomActions } from '@/hooks'
+import { useAsyncHandler } from '@/hooks/useAsyncHandler'
+import { roomActions } from '@/lib/firebase/room'
 import { cn } from '@/lib/utils'
 import { ExtendedRules, DEFAULT_EXTENDED_RULES } from '@/types/game'
 
 export function CreateRoomCard() {
   const router = useRouter()
-  const { createRoom } = useGameRoomActions()
+  const { handleAsync: createRoom, isPending: isCreateRoomPending } = useAsyncHandler(roomActions.createRoom)
 
   const [roomName, setRoomName] = useState('')
   const trimmedRoomName = roomName.trim()
-  const [isCreating, setIsCreating] = useState(false)
   const [extendedRules, setExtendedRules] = useState<ExtendedRules>(DEFAULT_EXTENDED_RULES)
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false)
 
@@ -30,7 +30,6 @@ export function CreateRoomCard() {
       return
     }
 
-    setIsCreating(true)
     try {
       const newRoomId = await createRoom({ roomName: trimmedRoomName, extendedRules })
 
@@ -39,8 +38,6 @@ export function CreateRoomCard() {
       })
     } catch (error) {
       alert(error instanceof Error ? error.message : '방 생성에 실패했습니다.')
-    } finally {
-      setIsCreating(false)
     }
   }
 
@@ -84,11 +81,11 @@ export function CreateRoomCard() {
 
         <Button
           className="h-12 w-full text-lg font-bold"
-          disabled={isCreating || isRouterPushPending || !trimmedRoomName}
+          disabled={isCreateRoomPending || isRouterPushPending || !trimmedRoomName}
           onClick={handleCreateRoom}
         >
           <GamepadIcon className="mr-2 h-5 w-5" />
-          {isCreating || isRouterPushPending ? '방 생성 중...' : '방 만들고 시작하기'}
+          {isCreateRoomPending || isRouterPushPending ? '방 생성 중...' : '방 만들고 시작하기'}
         </Button>
       </CardContent>
     </Card>

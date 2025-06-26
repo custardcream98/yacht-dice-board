@@ -1,4 +1,4 @@
-import { onSnapshot, DocumentReference } from 'firebase/firestore'
+import { onSnapshot, DocumentReference, DocumentData } from 'firebase/firestore'
 import { use, useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
 
 class FirestoreDocumentStore<T> {
@@ -128,7 +128,10 @@ function cleanupStore(cacheKey: string) {
   }
 }
 
-export function useFirestoreDocument<T>(docRef: DocumentReference, notFoundErrorMessage?: string) {
+export function useFirestoreDocument<T extends DocumentData>(
+  docRef: DocumentReference<T>,
+  notFoundErrorMessage?: string,
+) {
   const cacheKey = docRef.path
   const storeRef = useRef<FirestoreDocumentStore<T> | null>(null)
 

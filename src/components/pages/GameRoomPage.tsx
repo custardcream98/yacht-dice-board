@@ -7,16 +7,13 @@ import { GameHeader, WaitingRoom, ScoreInput, PlayerScoreSummary, GameFinished }
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ValueConsumer } from '@/components/ValueConsumer'
-import { useGamePlay, useGameRoomActions, useGameRoomData } from '@/hooks'
+import { useGameRoomData } from '@/hooks/useGameRoomData'
 import { exhaustiveCheck } from '@/lib/types'
-import { ExtendedRules, ScoreCategory } from '@/types/game'
 
 export default function GameRoomPage({ roomId, playerName }: { roomId: string; playerName: string }) {
   const router = useRouter()
 
   const { gameRoom } = useGameRoomData(roomId)
-  const { startGame, updateScore, restartGame } = useGamePlay()
-  const { deleteRoom } = useGameRoomActions()
 
   // 현재 사용자와 현재 차례 플레이어 찾기
   const myPlayer = gameRoom.players.find(p => p.name === playerName)
@@ -24,41 +21,6 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
 
   // 현재 플레이어의 차례인지 확인
   const isMyTurn = myPlayer && currentPlayer && myPlayer.id === currentPlayer.id
-
-  // 점수 제출 핸들러
-  const handleScoreSubmit = async (category: ScoreCategory, score: number) => {
-    if (!gameRoom || !myPlayer) return
-
-    try {
-      await updateScore({ roomId, playerId: myPlayer.id, category, score })
-    } catch (err) {
-      alert(err instanceof Error ? err.message : '점수 입력에 실패했습니다.')
-    }
-  }
-
-  // 게임 시작 핸들러
-  const handleStartGame = async () => {
-    try {
-      await startGame(roomId)
-    } catch (err) {
-      alert(err instanceof Error ? err.message : '게임 시작에 실패했습니다.')
-    }
-  }
-
-  // 방 삭제 핸들러
-  const handleDeleteRoom = async () => {
-    await deleteRoom(roomId)
-    alert('방이 성공적으로 삭제되었습니다.')
-  }
-
-  // 게임 재시작 핸들러
-  const handleRestartGame = async ({ extendedRules }: { extendedRules: ExtendedRules }) => {
-    try {
-      await restartGame({ roomId, extendedRules })
-    } catch (err) {
-      alert(err instanceof Error ? err.message : '게임 재시작에 실패했습니다.')
-    }
-  }
 
   // 플레이어가 없으면 에러 처리
   if (!myPlayer) {
@@ -87,20 +49,14 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* 헤더 */}
-      <GameHeader
-        currentPlayer={currentPlayer}
-        gameRoom={gameRoom}
-        isMyTurn={!!isMyTurn}
-        myPlayer={myPlayer}
-        onDeleteRoom={handleDeleteRoom}
-      />
+      <GameHeader currentPlayer={currentPlayer} gameRoom={gameRoom} isMyTurn={!!isMyTurn} myPlayer={myPlayer} />
 
       <div className="mx-auto max-w-md space-y-4 p-4">
         <ValueConsumer value={gameRoom.status}>
           {status => {
             switch (status) {
               case 'waiting':
-                return <WaitingRoom gameRoom={gameRoom} myPlayer={myPlayer} onStartGame={handleStartGame} />
+                return <WaitingRoom gameRoom={gameRoom} myPlayer={myPlayer} />
               case 'playing':
                 return (
                   <>
@@ -108,14 +64,14 @@ export default function GameRoomPage({ roomId, playerName }: { roomId: string; p
                       extendedRules={gameRoom.extendedRules}
                       isMyTurn={!!isMyTurn}
                       myPlayer={myPlayer}
-                      onScoreSubmit={handleScoreSubmit}
+                      roomId={roomId}
                     />
 
                     <PlayerScoreSummary gameRoom={gameRoom} myPlayer={myPlayer} />
                   </>
                 )
               case 'finished':
-                return <GameFinished gameRoom={gameRoom} myPlayer={myPlayer} onRestartGame={handleRestartGame} />
+                return <GameFinished gameRoom={gameRoom} myPlayer={myPlayer} />
               default:
                 exhaustiveCheck(status)
             }

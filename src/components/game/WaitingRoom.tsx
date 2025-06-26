@@ -5,15 +5,35 @@ import { PlayCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useAsyncHandler } from '@/hooks/useAsyncHandler'
+import { FirebaseCustomError } from '@/lib/firebase/error'
+import { gameActions, isStartGameErrorCode, START_GAME_ERROR_CODES } from '@/lib/firebase/game'
 import { GameRoom, Player } from '@/types/game'
 
 interface WaitingRoomProps {
   gameRoom: GameRoom
   myPlayer: Player
-  onStartGame: () => void
 }
 
-export function WaitingRoom({ gameRoom, myPlayer, onStartGame }: WaitingRoomProps) {
+const START_GAME_ERROR_MESSAGES = {
+  [START_GAME_ERROR_CODES.ROOM_NOT_FOUND]: '존재하지 않는 방입니다.',
+} as const
+
+export function WaitingRoom({ gameRoom, myPlayer }: WaitingRoomProps) {
+  const { handleAsync: startGame, isPending: isStartGamePending } = useAsyncHandler(gameActions.startGame)
+
+  const handleStartGame = async () => {
+    try {
+      await startGame(gameRoom.id)
+    } catch (err) {
+      alert(
+        err instanceof FirebaseCustomError && isStartGameErrorCode(err.code)
+          ? START_GAME_ERROR_MESSAGES[err.code]
+          : '게임 시작에 실패했습니다.',
+      )
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -38,7 +58,7 @@ export function WaitingRoom({ gameRoom, myPlayer, onStartGame }: WaitingRoomProp
             ))}
           </div>
         </div>
-        <Button className="h-12 w-full text-lg font-bold" onClick={onStartGame}>
+        <Button className="h-12 w-full text-lg font-bold" disabled={isStartGamePending} onClick={handleStartGame}>
           <PlayCircle className="mr-2 h-5 w-5" />
           게임 시작하기
         </Button>

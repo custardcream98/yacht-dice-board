@@ -7,15 +7,15 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { useGameRoomActions } from '@/hooks'
+import { useAsyncHandler } from '@/hooks/useAsyncHandler'
+import { roomActions } from '@/lib/firebase/room'
 
 export function DeleteRoomCard() {
   const [deleteRoomId, setDeleteRoomId] = useState('')
   const roomId = deleteRoomId.trim()
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
 
-  const { deleteRoom } = useGameRoomActions()
+  const { handleAsync: deleteRoom, isPending: isDeleteRoomPending } = useAsyncHandler(roomActions.deleteRoom)
 
   const handleDeleteRoom = async () => {
     if (!roomId) {
@@ -23,7 +23,6 @@ export function DeleteRoomCard() {
       return
     }
 
-    setIsDeleting(true)
     try {
       await deleteRoom(roomId)
 
@@ -32,8 +31,6 @@ export function DeleteRoomCard() {
       alert('방이 성공적으로 삭제되었습니다.')
     } catch (error) {
       alert(error instanceof Error ? error.message : '방 삭제에 실패했습니다.')
-    } finally {
-      setIsDeleting(false)
     }
   }
 
@@ -76,13 +73,13 @@ export function DeleteRoomCard() {
               <div className="flex gap-2">
                 <Button
                   className="flex-1"
-                  disabled={isDeleting || !roomId}
+                  disabled={isDeleteRoomPending || !roomId}
                   onClick={handleDeleteRoom}
                   variant="destructive"
                 >
-                  {isDeleting ? '삭제 중...' : '영구 삭제'}
+                  {isDeleteRoomPending ? '삭제 중...' : '영구 삭제'}
                 </Button>
-                <Button disabled={isDeleting} onClick={() => setIsDeleteDialogOpen(false)} variant="outline">
+                <Button disabled={isDeleteRoomPending} onClick={() => setIsDeleteDialogOpen(false)} variant="outline">
                   취소
                 </Button>
               </div>
