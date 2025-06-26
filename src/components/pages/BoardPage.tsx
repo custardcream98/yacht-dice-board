@@ -66,11 +66,7 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
   const rankings = getPlayerRankings(gameRoom)
 
   return (
-    <div
-      className={
-        'min-h-screen bg-gradient-to-br from-indigo-950 via-slate-900 to-purple-900 p-4 relative overflow-hidden flex flex-col'
-      }
-    >
+    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-slate-900 to-purple-900 p-4 relative overflow-hidden flex flex-col">
       {/* 배경 장식 요소 */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
