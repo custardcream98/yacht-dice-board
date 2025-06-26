@@ -117,32 +117,25 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
 
       <div className="relative z-10 container mx-auto flex max-w-7xl flex-1 flex-col">
         {/* 헤더 */}
-        <div className={cn('text-center', isFullscreen ? 'mb-2' : 'mb-8')}>
-          <div className={cn('flex items-center justify-center gap-3', isFullscreen ? 'mb-1' : 'mb-4')}>
-            <h1 className={cn('font-bold text-white', isFullscreen ? 'text-2xl' : 'text-5xl')}>{gameRoom.name}</h1>
-          </div>
+        <div className={cn('text-center', isFullscreen ? 'mb-2 flex items-center justify-center gap-2' : 'mb-8')}>
+          <h1 className={cn('font-bold text-white', isFullscreen ? 'text-2xl' : 'mb-4 text-5xl')}>{gameRoom.name}</h1>
 
-          <div
-            className={cn(
-              'flex flex-wrap items-center justify-center gap-2 text-white/90',
-              isFullscreen ? 'text-xs' : 'text-sm',
-            )}
-          >
-              <Badge
-                className={cn(
-                  'border-0 font-medium shadow-lg backdrop-blur-sm',
-                  isFullscreen ? 'px-2 py-1 text-xs' : 'px-4 py-2 text-sm',
-                  gameRoom.status === 'playing'
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
-                    : gameRoom.status === 'finished'
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                      : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white',
-                )}
-              >
-                {gameRoom.status === 'waiting' && '🎯 대기 중'}
-                {gameRoom.status === 'playing' && '🎮 게임 진행 중'}
-                {gameRoom.status === 'finished' && '🏆 게임 종료'}
-              </Badge>
+          <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-white/90">
+            <Badge
+              className={cn(
+                'border-0 font-medium shadow-lg backdrop-blur-sm',
+                isFullscreen ? 'px-2 py-1 text-xs' : 'px-4 py-2 text-sm',
+                gameRoom.status === 'playing'
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
+                  : gameRoom.status === 'finished'
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                    : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white',
+              )}
+            >
+              {gameRoom.status === 'waiting' && '🎯 대기 중'}
+              {gameRoom.status === 'playing' && '🎮 게임 진행 중'}
+              {gameRoom.status === 'finished' && '🏆 게임 종료'}
+            </Badge>
 
             {gameRoom.status === 'playing' && (
               <div className="flex items-center gap-2">
@@ -261,36 +254,46 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
         )}
 
         {/* 점수판 */}
-        <div className="mt-auto mb-auto overflow-x-auto rounded-2xl border-2 border-white/20 bg-white shadow-2xl">
+        <div
+          className={cn(
+            'mt-auto mb-auto overflow-x-auto rounded-2xl border-2 border-white/20 bg-white shadow-2xl',
+            isFullscreen && 'h-[var(--height)]',
+          )}
+          style={
+            {
+              '--height': 'calc(100vh - 80px)',
+              '--row-height': `calc(calc(var(--height) - ${HEADER_ROW_HEIGHT + BORDER_HEIGHT_SUM}px) / ${UPPER_SECTION_CATEGORIES.length + visibleLowerCategories.length + SPECIAL_ROW_HEIGHT_RATIO * 2 + SCORE_ROW_HEIGHT_RATIO})`,
+
+              '--row-font-size': 'calc(var(--row-height) * 0.2)',
+              '--special-row-font-size': 'calc(var(--special-row-height) * 0.25)',
+              '--score-row-font-size': 'calc(var(--score-row-height) * 0.3)',
+
+              '--header-row-height': `${HEADER_ROW_HEIGHT}px`,
+              '--special-row-height': `calc(var(--row-height) * ${SPECIAL_ROW_HEIGHT_RATIO})`,
+              '--score-row-height': `calc(var(--row-height) * ${SCORE_ROW_HEIGHT_RATIO})`,
+            } as React.CSSProperties
+          }
+        >
           <Table>
             <TableHeader>
               <TableRow className="border-b-2 border-slate-200 bg-gradient-to-r from-slate-100/80 to-gray-100/80 backdrop-blur-sm">
-                <TableHead className="font-bold text-slate-700" />
+                <TableHead />
                 {gameRoom.players.map(player => (
-                  <TableHead className={cn(`text-center`, isFullscreen ? 'min-w-32' : 'min-w-24')} key={player.id}>
-                    <div className={cn('space-y-1', isFullscreen ? 'py-1' : 'py-2')}>
-                      <div className={cn('font-bold text-slate-800', isFullscreen ? 'text-sm' : 'text-base')}>
-                        {player.name}
-                      </div>
+                  <TableHead
+                    className={cn(`h-[var(--header-row-height)] text-center`, isFullscreen ? 'min-w-32' : 'min-w-24')}
+                    key={player.id}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      <div className="font-bold text-slate-800">{player.name}</div>
                       {gameRoom.status === 'playing' &&
                         gameRoom.players[gameRoom.currentPlayerIndex]?.id === player.id && (
-                          <Badge
-                            className={cn(
-                              'animate-pulse bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg',
-                              isFullscreen ? 'px-1 text-xs' : 'text-xs',
-                            )}
-                          >
+                          <Badge className="animate-pulse bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg">
                             🎯 현재 차례
                           </Badge>
                         )}
                       {gameRoom.status === 'finished' &&
                         rankings.some(r => r.ranking === 1 && r.player.id === player.id) && (
-                          <Badge
-                            className={cn(
-                              'bg-gradient-to-r from-yellow-500 to-amber-500 text-white shadow-lg',
-                              isFullscreen ? 'px-1 text-xs' : 'text-xs',
-                            )}
-                          >
+                          <Badge className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white shadow-lg">
                             🏆 {rankings.filter(r => r.ranking === 1).length > 1 ? '공동우승' : '우승'}
                           </Badge>
                         )}
@@ -302,105 +305,80 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
             <TableBody>
               {/* 상위 섹션 */}
               {UPPER_SECTION_CATEGORIES.map(category => (
-                <TableRow
-                  className="border-b border-slate-100 transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50"
-                  key={category}
-                >
-                  <TableCell
-                    className={cn(
-                      `bg-gradient-to-r from-slate-50 to-gray-50 pl-4 font-bold text-slate-700`,
-                      isFullscreen ? 'py-2 text-base' : 'py-3 text-sm',
-                    )}
-                  >
-                    <div className="flex items-center gap-2">{CATEGORY_NAMES[category]}</div>
+                <TableRow className="border-b border-slate-100" key={category}>
+                  <TableCell className="h-[var(--row-height)] bg-slate-50 pl-3 font-bold text-slate-700">
+                    {CATEGORY_NAMES[category]}
                   </TableCell>
                   {gameRoom.players.map(player => (
                     <TableCell
-                      className={cn(`text-center transition-all duration-200`, isFullscreen ? 'py-2' : 'py-3')}
+                      className="h-[var(--row-height)] text-center font-mono text-[length:var(--row-font-size)] font-bold"
                       key={player.id}
                     >
-                      <div
-                        className={cn(
-                          `font-mono font-bold transition-all duration-200`,
-                          isFullscreen ? 'text-xl' : 'text-lg',
-                          player.scores[category] !== undefined ? 'text-slate-800' : 'text-slate-400',
-                        )}
-                      >
-                        {player.scores[category] !== undefined ? player.scores[category] : '—'}
-                      </div>
+                      {player.scores[category] !== undefined ? player.scores[category] : '—'}
                     </TableCell>
                   ))}
                 </TableRow>
               ))}
 
               {/* 상위 섹션 보너스 */}
-              <TableRow className="border-y-2 border-emerald-200 bg-gradient-to-r from-emerald-50/80 to-green-50/80">
-                <TableCell className="py-2 pl-4 text-sm font-bold text-emerald-800">상위 섹션 총점</TableCell>
+              <TableRow className="border-t-2 border-emerald-200 bg-gradient-to-r from-emerald-50/80 to-green-50/80">
+                <TableCell className="h-[var(--special-row-height)] pl-3 font-bold text-emerald-800">
+                  상위 섹션 총점
+                </TableCell>
                 {gameRoom.players.map(player => (
-                  <TableCell className="py-2 text-center font-mono text-lg font-bold text-emerald-700" key={player.id}>
+                  <TableCell
+                    className="h-[var(--special-row-height)] text-center font-mono text-[length:var(--special-row-font-size)] font-bold text-emerald-700"
+                    key={player.id}
+                  >
                     {calculateUpperSectionTotal(player)}
                   </TableCell>
                 ))}
               </TableRow>
-              <TableRow className="border-b-2 border-blue-200 bg-gradient-to-r from-blue-50/80 to-indigo-50/80">
-                <TableCell
-                  className={cn(`pl-4 font-bold text-blue-800`, isFullscreen ? 'py-2 text-base' : 'py-3 text-sm')}
-                >
-                  보너스
-                </TableCell>
-                {gameRoom.players.map(player => (
-                  <TableCell className={cn('text-center', isFullscreen ? 'py-2' : 'py-3')} key={player.id}>
-                    <div
+              <TableRow className="border-y-2 border-blue-200 bg-gradient-to-r from-blue-50/80 to-indigo-50/80">
+                <TableCell className="h-[var(--special-row-height)] pl-3 font-bold text-blue-800">보너스</TableCell>
+                {gameRoom.players.map(player => {
+                  const bonus = calculateUpperBonus(player)
+
+                  return (
+                    <TableCell
                       className={cn(
-                        `font-mono font-bold`,
-                        isFullscreen ? 'text-xl' : 'text-lg',
-                        calculateUpperBonus(player) > 0 ? 'text-blue-700' : 'text-slate-400',
+                        'h-[var(--special-row-height)] text-center font-mono text-[length:var(--special-row-font-size)] font-bold',
+                        bonus > 0 ? 'text-blue-700' : 'text-slate-400',
                       )}
+                      key={player.id}
                     >
-                      {calculateUpperBonus(player)}
-                    </div>
-                  </TableCell>
-                ))}
+                      {bonus}
+                    </TableCell>
+                  )
+                })}
               </TableRow>
 
               {/* 하위 섹션 */}
               {visibleLowerCategories.map(category => (
-                <TableRow
-                  className="border-b border-slate-100 transition-all duration-200 hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-pink-50/50"
-                  key={category}
-                >
-                  <TableCell
-                    className={cn(
-                      `bg-gradient-to-r from-slate-50 to-gray-50 pl-4 font-bold text-slate-700`,
-                      isFullscreen ? 'py-2 text-base' : 'py-3 text-sm',
+                <TableRow className="border-b border-slate-100" key={category}>
+                  <TableCell className="flex h-[var(--row-height)] items-center gap-2 bg-slate-50 pl-3 font-bold text-slate-700">
+                    {CATEGORY_NAMES[category]}
+                    {/* 확장 룰 표시 */}
+                    {category === 'threeOfAKind' && gameRoom.extendedRules?.enableThreeOfAKind && (
+                      <Badge className="border-orange-300 bg-orange-100 text-xs text-orange-800" variant="outline">
+                        확장
+                      </Badge>
                     )}
-                  >
-                    <div className="flex items-center gap-2">
-                      {CATEGORY_NAMES[category]}
-                      {/* 확장 룰 표시 */}
-                      {category === 'threeOfAKind' && gameRoom.extendedRules?.enableThreeOfAKind && (
-                        <Badge className="border-orange-300 bg-orange-100 text-xs text-orange-800" variant="outline">
-                          확장
-                        </Badge>
-                      )}
-                      {category === 'fullHouse' && gameRoom.extendedRules?.fullHouseFixedScore && (
-                        <Badge className="border-orange-300 bg-orange-100 text-xs text-orange-800" variant="outline">
-                          고정 25점
-                        </Badge>
-                      )}
-                    </div>
+                    {category === 'fullHouse' && gameRoom.extendedRules?.fullHouseFixedScore && (
+                      <Badge className="border-orange-300 bg-orange-100 text-xs text-orange-800" variant="outline">
+                        고정 25점
+                      </Badge>
+                    )}
                   </TableCell>
                   {gameRoom.players.map(player => (
-                    <TableCell className={cn('text-center', isFullscreen ? 'py-2' : 'py-3')} key={player.id}>
-                      <div
-                        className={cn(
-                          `font-mono font-bold transition-all duration-200`,
-                          isFullscreen ? 'text-xl' : 'text-lg',
-                          player.scores[category] !== undefined ? 'text-slate-800' : 'text-slate-400',
-                        )}
-                      >
-                        {player.scores[category] !== undefined ? player.scores[category] : '—'}
-                      </div>
+                    <TableCell
+                      className={cn(
+                        'h-[var(--row-height)] text-center font-mono text-[length:var(--row-font-size)] font-bold',
+                        player.scores[category] !== undefined ? 'text-slate-800' : 'text-slate-400',
+                      )}
+                      key={player.id}
+                    >
+                      {player.scores[category] !== undefined ? player.scores[category] : '—'}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -408,16 +386,17 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
 
               {/* 총점 */}
               <TableRow className="border-t-4 border-yellow-400 bg-gradient-to-r from-yellow-100/90 via-amber-100/90 to-orange-100/90 shadow-lg">
-                <TableCell
-                  className={cn(`pl-4 font-bold text-yellow-800`, isFullscreen ? 'py-4 text-xl' : 'py-4 text-lg')}
-                >
+                <TableCell className="h-[var(--score-row-height)] pl-3 text-lg font-bold text-yellow-800">
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">🏆</span>
+                    <span>🏆</span>
                     <span>총점</span>
                   </div>
                 </TableCell>
                 {gameRoom.players.map(player => (
-                  <TableCell className="py-4 text-center font-mono text-2xl font-bold text-yellow-700" key={player.id}>
+                  <TableCell
+                    className="h-[var(--score-row-height)] text-center font-mono text-[length:var(--score-row-font-size)] font-bold text-yellow-700"
+                    key={player.id}
+                  >
                     {calculatePlayerTotal(player)}
                   </TableCell>
                 ))}
@@ -447,3 +426,8 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
     </div>
   )
 }
+
+const BORDER_HEIGHT_SUM = 12
+const HEADER_ROW_HEIGHT = 40
+const SPECIAL_ROW_HEIGHT_RATIO = 1.1
+const SCORE_ROW_HEIGHT_RATIO = 1.3
