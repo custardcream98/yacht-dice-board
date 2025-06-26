@@ -264,9 +264,9 @@ export default function GameBoardPage({ roomId }: { roomId: string }) {
               '--height': 'calc(100vh - 80px)',
               '--row-height': `calc(calc(var(--height) - ${HEADER_ROW_HEIGHT + BORDER_HEIGHT_SUM}px) / ${UPPER_SECTION_CATEGORIES.length + visibleLowerCategories.length + SPECIAL_ROW_HEIGHT_RATIO * 2 + SCORE_ROW_HEIGHT_RATIO})`,
 
-              '--row-font-size': 'calc(var(--row-height) * 0.2)',
-              '--special-row-font-size': 'calc(var(--special-row-height) * 0.25)',
-              '--score-row-font-size': 'calc(var(--score-row-height) * 0.3)',
+              '--row-font-size': 'calc(var(--row-height) * 0.37)',
+              '--special-row-font-size': 'calc(var(--special-row-height) * 0.37)',
+              '--score-row-font-size': 'calc(var(--score-row-height) * 0.37)',
 
               '--header-row-height': `${HEADER_ROW_HEIGHT}px`,
               '--special-row-height': `calc(var(--row-height) * ${SPECIAL_ROW_HEIGHT_RATIO})`,
