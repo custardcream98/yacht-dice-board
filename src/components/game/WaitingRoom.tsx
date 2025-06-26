@@ -17,17 +17,17 @@ export function WaitingRoom({ gameRoom, myPlayer, onStartGame }: WaitingRoomProp
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-center flex items-center justify-center gap-2">
+        <CardTitle className="flex items-center justify-center gap-2 text-center">
           <PlayCircle className="h-6 w-6" />
           게임 시작 준비
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <h3 className="font-bold mb-2">참가자 ({gameRoom.players.length}명)</h3>
+          <h3 className="mb-2 font-bold">참가자 ({gameRoom.players.length}명)</h3>
           <div className="space-y-2">
             {gameRoom.players.map((player, index) => (
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg" key={player.id}>
+              <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3" key={player.id}>
                 <span className="font-medium">
                   {player.name}
                   {player.id === myPlayer.id && ' (나)'}
@@ -38,8 +38,8 @@ export function WaitingRoom({ gameRoom, myPlayer, onStartGame }: WaitingRoomProp
             ))}
           </div>
         </div>
-        <Button className="w-full h-12 text-lg font-bold" onClick={onStartGame}>
-          <PlayCircle className="h-5 w-5 mr-2" />
+        <Button className="h-12 w-full text-lg font-bold" onClick={onStartGame}>
+          <PlayCircle className="mr-2 h-5 w-5" />
           게임 시작하기
         </Button>
       </CardContent>

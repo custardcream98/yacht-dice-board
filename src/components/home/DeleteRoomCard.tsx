@@ -48,7 +48,7 @@ export function DeleteRoomCard() {
         <Dialog onOpenChange={setIsDeleteDialogOpen} open={isDeleteDialogOpen}>
           <DialogTrigger asChild>
             <Button className="w-full" variant="destructive">
-              <Trash2 className="h-4 w-4 mr-2" />방 삭제하기
+              <Trash2 className="mr-2 h-4 w-4" />방 삭제하기
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -59,12 +59,12 @@ export function DeleteRoomCard() {
             </DialogHeader>
             <div className="space-y-4">
               <RoomIdInput deleteRoomId={deleteRoomId} onRoomIdChange={setDeleteRoomId} />
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3">
                 <div className="flex items-start gap-2">
-                  <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+                  <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-500" />
                   <div className="text-sm text-red-700">
-                    <p className="font-medium mb-2">주의사항</p>
-                    <ul className="list-disc list-inside space-y-1 text-xs">
+                    <p className="mb-2 font-medium">주의사항</p>
+                    <ul className="list-inside list-disc space-y-1 text-xs">
                       <li>모든 플레이어가 방에서 나가게 됩니다</li>
                       <li>게임 진행 상황과 점수가 모두 삭제됩니다</li>
                       <li>삭제 후에는 복구가 불가능합니다</li>
@@ -105,7 +105,7 @@ const RoomIdInput = ({
 
   return (
     <div>
-      <label className="block text-sm font-medium mb-2" htmlFor={id}>
+      <label className="mb-2 block text-sm font-medium" htmlFor={id}>
         삭제할 방 ID
       </label>
       <Input

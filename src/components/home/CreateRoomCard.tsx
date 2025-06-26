@@ -66,7 +66,7 @@ export function CreateRoomCard() {
             type="button"
             variant="outline"
           >
-            <Settings className="h-4 w-4 mr-2" />
+            <Settings className="mr-2 h-4 w-4" />
             {showAdvancedSettings ? '확장 룰 설정 접기' : '확장 룰 설정 펼치기'}
           </Button>
 
@@ -83,11 +83,11 @@ export function CreateRoomCard() {
         </div>
 
         <Button
-          className="w-full h-12 text-lg font-bold"
+          className="h-12 w-full text-lg font-bold"
           disabled={isCreating || isRouterPushPending || !trimmedRoomName}
           onClick={handleCreateRoom}
         >
-          <GamepadIcon className="h-5 w-5 mr-2" />
+          <GamepadIcon className="mr-2 h-5 w-5" />
           {isCreating || isRouterPushPending ? '방 생성 중...' : '방 만들고 시작하기'}
         </Button>
       </CardContent>
@@ -106,7 +106,7 @@ const RoomNameInput = ({
 
   return (
     <div>
-      <label className="block text-sm font-medium mb-2" htmlFor={id}>
+      <label className="mb-2 block text-sm font-medium" htmlFor={id}>
         방 이름
       </label>
       <Input

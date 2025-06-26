@@ -40,7 +40,7 @@ export function LinkShareButton({ url, label, icon: Icon }: LinkShareButtonProps
         <span className="text-sm font-medium">{label}</span>
       </div>
       <div className="flex gap-2">
-        <Input className="text-xs font-mono" onClick={e => e.currentTarget.select()} readOnly value={url} />
+        <Input className="font-mono text-xs" onClick={e => e.currentTarget.select()} readOnly value={url} />
         <Button
           className="flex-shrink-0"
           onClick={copyToClipboard}
@@ -49,12 +49,12 @@ export function LinkShareButton({ url, label, icon: Icon }: LinkShareButtonProps
         >
           {copied ? (
             <>
-              <Check className="h-4 w-4 mr-1" />
+              <Check className="mr-1 h-4 w-4" />
               복사됨
             </>
           ) : (
             <>
-              <Copy className="h-4 w-4 mr-1" />
+              <Copy className="mr-1 h-4 w-4" />
               복사
             </>
           )}

@@ -59,11 +59,11 @@ export default function InvitePage({ roomId }: InvitePageProps) {
   )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="w-full max-w-md space-y-6">
         {/* 헤더 */}
         <div className="text-center">
-          <div className="flex items-center justify-center gap-3 mb-3">
+          <div className="mb-3 flex items-center justify-center gap-3">
             <UserPlus className="h-8 w-8 text-blue-600" />
             <h1 className="text-3xl font-bold text-gray-800">
               {gameRoom.players.length === 0 ? '게임 시작하기' : '게임 참여하기'}
@@ -77,9 +77,9 @@ export default function InvitePage({ roomId }: InvitePageProps) {
         {/* 게임방 정보 */}
         <Card className="border-blue-200 bg-blue-50">
           <CardContent className="p-6">
-            <div className="text-center space-y-3">
+            <div className="space-y-3 text-center">
               <div>
-                <h2 className="text-xl font-bold text-blue-800 mb-1">{gameRoom.name}</h2>
+                <h2 className="mb-1 text-xl font-bold text-blue-800">{gameRoom.name}</h2>
                 <div className="flex items-center justify-center gap-2">
                   <Badge className="px-3 py-1" variant={gameRoom.status === 'playing' ? 'default' : 'secondary'}>
                     {gameRoom.status === 'waiting' && '대기 중'}
@@ -90,12 +90,12 @@ export default function InvitePage({ roomId }: InvitePageProps) {
               </div>
 
               {gameRoom.players.length > 0 && (
-                <div className="bg-white/50 rounded-lg p-3">
-                  <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="rounded-lg bg-white/50 p-3">
+                  <div className="mb-2 flex items-center justify-center gap-2">
                     <Users className="h-4 w-4 text-blue-600" />
                     <span className="text-sm font-medium text-blue-800">참여자 ({gameRoom.players.length}명)</span>
                   </div>
-                  <div className="flex flex-wrap gap-1 justify-center">
+                  <div className="flex flex-wrap justify-center gap-1">
                     {gameRoom.players.map(player => (
                       <Badge className="text-xs" key={player.id} variant="outline">
                         {player.name}
@@ -125,13 +125,13 @@ export default function InvitePage({ roomId }: InvitePageProps) {
               <ul className="space-y-2">
                 {gameRoom.extendedRules.fullHouseFixedScore && (
                   <li className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <div className="h-2 w-2 rounded-full bg-orange-500"></div>
                     <span className="text-sm text-orange-800">Full House 고정 점수 (25점)</span>
                   </li>
                 )}
                 {gameRoom.extendedRules.enableThreeOfAKind && (
                   <li className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <div className="h-2 w-2 rounded-full bg-orange-500"></div>
                     <span className="text-sm text-orange-800">3 of a Kind 족보 추가</span>
                   </li>
                 )}
@@ -150,7 +150,7 @@ export default function InvitePage({ roomId }: InvitePageProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <form id={nameFormId} onSubmit={handleJoinRoom}>
-              <label className="block text-sm font-medium mb-2" htmlFor="playerName">
+              <label className="mb-2 block text-sm font-medium" htmlFor="playerName">
                 {gameRoom.players.length === 0 ? '방장 이름' : '플레이어 이름'}
               </label>
               <Input
@@ -165,12 +165,12 @@ export default function InvitePage({ roomId }: InvitePageProps) {
             </form>
 
             <Button
-              className="w-full h-12 text-lg font-bold"
+              className="h-12 w-full text-lg font-bold"
               disabled={isJoining || isRouterPushPending || !name}
               form={nameFormId}
               type="submit"
             >
-              <Users className="h-5 w-5 mr-2" />
+              <Users className="mr-2 h-5 w-5" />
               {isJoining || isRouterPushPending
                 ? '참여 중...'
                 : gameRoom.players.length === 0
@@ -182,23 +182,23 @@ export default function InvitePage({ roomId }: InvitePageProps) {
 
         {/* 추가 기능들 */}
         <Card>
-          <CardContent className="p-4 space-y-4">
+          <CardContent className="space-y-4 p-4">
             {/* QR 코드 공유 */}
-            <div className="text-center space-y-3">
+            <div className="space-y-3 text-center">
               <div className="text-sm text-gray-600">
                 {gameRoom.players.length === 0 ? '친구들을 초대하세요!' : '더 많은 친구들을 초대하고 싶다면'}
               </div>
-              <QRCodeShareButton className="w-full h-12 text-lg font-bold" roomId={roomId} />
+              <QRCodeShareButton className="h-12 w-full text-lg font-bold" roomId={roomId} />
             </div>
 
             <div className="border-t border-gray-200"></div>
 
             {/* 전광판 바로가기 */}
-            <div className="text-center space-y-3">
+            <div className="space-y-3 text-center">
               <div className="text-sm text-gray-600">게임에 참여하지 않고 점수만 확인하고 싶다면</div>
-              <Button asChild className="w-full h-12 text-lg font-bold" variant="outline">
+              <Button asChild className="h-12 w-full text-lg font-bold" variant="outline">
                 <Link href={`/board/${roomId}`}>
-                  <Monitor className="h-5 w-5 mr-2" />
+                  <Monitor className="mr-2 h-5 w-5" />
                   전광판으로 이동하기
                 </Link>
               </Button>
@@ -207,11 +207,11 @@ export default function InvitePage({ roomId }: InvitePageProps) {
         </Card>
 
         {/* 하단 정보 */}
-        <div className="text-center text-sm text-gray-500 space-y-1">
+        <div className="space-y-1 text-center text-sm text-gray-500">
           <p>친구들과 함께 Yacht Dice를 즐겨보세요!</p>
           <Button asChild className="text-gray-500 hover:text-gray-700" size="sm" variant="ghost">
             <Link href="/">
-              <ArrowLeft className="h-3 w-3 mr-1" />
+              <ArrowLeft className="mr-1 h-3 w-3" />
               홈으로 돌아가기
             </Link>
           </Button>

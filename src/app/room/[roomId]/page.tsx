@@ -19,7 +19,7 @@ export default async function RoomPage({
     <ErrorBoundary
       fallback={
         <ErrorFallback>
-          <p className="text-red-600 mb-4">게임방을 찾을 수 없습니다.</p>
+          <p className="mb-4 text-red-600">게임방을 찾을 수 없습니다.</p>
           <p className="text-sm text-gray-600">방 ID를 확인하고 다시 시도해주세요.</p>
         </ErrorFallback>
       }

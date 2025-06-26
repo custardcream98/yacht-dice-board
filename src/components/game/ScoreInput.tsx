@@ -50,7 +50,7 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
           점수 입력
           {!isMyTurn && (
             <Badge className="ml-auto text-xs" variant="secondary">
-              <Lock className="h-3 w-3 mr-1" />
+              <Lock className="mr-1 h-3 w-3" />
               대기 중
             </Badge>
           )}
@@ -59,7 +59,7 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
       <CardContent className="space-y-4">
         {/* 상위 섹션 */}
         <div>
-          <h3 className="font-bold mb-3 text-blue-700">상위 섹션</h3>
+          <h3 className="mb-3 font-bold text-blue-700">상위 섹션</h3>
           <div className="grid grid-cols-2 gap-2">
             {UPPER_SECTION_CATEGORIES.map(category => {
               const score = myPlayer?.scores[category]
@@ -70,12 +70,12 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
                 <UpperSectionDialog category={category} key={category} onScoreSubmit={onScoreSubmit}>
                   <Button
                     className={cn(
-                      'h-16 flex flex-col items-center justify-center p-2 relative overflow-hidden',
+                      'relative flex h-16 flex-col items-center justify-center overflow-hidden p-2',
                       isWaitingTurn
-                        ? 'opacity-50 cursor-not-allowed'
+                        ? 'cursor-not-allowed opacity-50'
                         : isScored
-                          ? 'cursor-not-allowed bg-gradient-to-br from-blue-100 to-blue-200 border-blue-300 shadow-md transform'
-                          : 'hover:bg-blue-50 hover:border-blue-300',
+                          ? 'transform cursor-not-allowed border-blue-300 bg-gradient-to-br from-blue-100 to-blue-200 shadow-md'
+                          : 'hover:border-blue-300 hover:bg-blue-50',
                     )}
                     disabled={isWaitingTurn}
                     onClick={event => {
@@ -86,19 +86,19 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
                     variant={isScored ? 'secondary' : 'outline'}
                   >
                     {isScored && (
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 to-blue-100/40 pointer-events-none" />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-50/40 to-blue-100/40" />
                     )}
-                    <div className="flex items-center gap-1 mb-1 relative z-10">
+                    <div className="relative z-10 mb-1 flex items-center gap-1">
                       <DiceIcon value={UPPER_SECTION_DICE_COUNT[category]} />
                       <span className={cn('text-xs font-bold', isScored && 'text-blue-700')}>
                         {CATEGORY_NAMES[category]}
                       </span>
                     </div>
-                    <div className={cn('font-bold relative z-10', isScored ? 'text-blue-800 text-xl' : 'text-lg')}>
+                    <div className={cn('relative z-10 font-bold', isScored ? 'text-xl text-blue-800' : 'text-lg')}>
                       {isScored ? `${score}점` : '-'}
                     </div>
                     {isWaitingTurn && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100/80 rounded">
+                      <div className="absolute inset-0 flex items-center justify-center rounded bg-gray-100/80">
                         <Lock className="h-4 w-4 text-gray-400" />
                       </div>
                     )}
@@ -111,7 +111,7 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
 
         {/* 하위 섹션 */}
         <div>
-          <h3 className="font-bold mb-3 text-green-700">하위 섹션</h3>
+          <h3 className="mb-3 font-bold text-green-700">하위 섹션</h3>
           <div className="grid grid-cols-1 gap-2">
             {visibleLowerCategories.map(category => {
               const score = myPlayer?.scores[category]
@@ -131,12 +131,12 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
                 >
                   <Button
                     className={cn(
-                      'h-16 flex items-center justify-between p-4 relative overflow-hidden',
+                      'relative flex h-16 items-center justify-between overflow-hidden p-4',
                       isWaitingTurn
-                        ? 'opacity-50 cursor-not-allowed'
+                        ? 'cursor-not-allowed opacity-50'
                         : isScored
-                          ? 'cursor-not-allowed bg-gradient-to-br from-green-100 to-green-200 border-green-300 shadow-md transform'
-                          : 'hover:bg-green-50 hover:border-green-300',
+                          ? 'transform cursor-not-allowed border-green-300 bg-gradient-to-br from-green-100 to-green-200 shadow-md'
+                          : 'hover:border-green-300 hover:bg-green-50',
                     )}
                     disabled={isWaitingTurn}
                     onClick={event => {
@@ -147,24 +147,24 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, onScoreSubmit }:
                     variant={isScored ? 'secondary' : 'outline'}
                   >
                     {isScored && (
-                      <div className="absolute inset-0 bg-gradient-to-br from-green-50/40 to-green-100/40 pointer-events-none" />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-green-50/40 to-green-100/40" />
                     )}
                     <div className="flex items-center gap-2">
-                      <span className={cn('font-bold relative z-10', isScored && 'text-green-700')}>
+                      <span className={cn('relative z-10 font-bold', isScored && 'text-green-700')}>
                         {CATEGORY_NAMES[category]}
                       </span>
                       {/* 확장 룰 표시 */}
                       {isExtendedRule && (
-                        <Badge className="text-xs bg-orange-100 text-orange-800" variant="outline">
+                        <Badge className="bg-orange-100 text-xs text-orange-800" variant="outline">
                           확장
                         </Badge>
                       )}
                     </div>
-                    <span className={cn('font-bold relative z-10', isScored ? 'text-green-800 text-xl' : 'text-lg')}>
+                    <span className={cn('relative z-10 font-bold', isScored ? 'text-xl text-green-800' : 'text-lg')}>
                       {isScored ? `${score}점` : '-'}
                     </span>
                     {isWaitingTurn && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100/80 rounded">
+                      <div className="absolute inset-0 flex items-center justify-center rounded bg-gray-100/80">
                         <Lock className="h-5 w-5 text-gray-400" />
                       </div>
                     )}
@@ -192,7 +192,7 @@ const UpperSectionDialog = ({
   return (
     <Dialog onOpenChange={setIsOpen} open={isOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] w-[95vw] max-w-md overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <DiceIcon value={UPPER_SECTION_DICE_COUNT[category]} />
@@ -240,7 +240,7 @@ const UpperSectionInput = ({
 
   return (
     <div className="space-y-6">
-      <div className="text-center bg-gray-50 p-3 rounded-lg">
+      <div className="rounded-lg bg-gray-50 p-3 text-center">
         <div className="mb-1 text-sm font-medium text-gray-700">
           {diceValue} {DICE_VALUE_TO_JOSA[diceValue]} 나온 주사위 개수를 입력하세요
         </div>
@@ -259,7 +259,7 @@ const UpperSectionInput = ({
           <Minus className="h-4 w-4" />
         </Button>
 
-        <div className="flex items-center justify-center h-20 w-20 border-2 border-blue-300 rounded-xl bg-blue-50 text-2xl font-bold text-blue-700">
+        <div className="flex h-20 w-20 items-center justify-center rounded-xl border-2 border-blue-300 bg-blue-50 text-2xl font-bold text-blue-700">
           {diceCount}
         </div>
 
@@ -275,25 +275,25 @@ const UpperSectionInput = ({
       </div>
 
       {/* 계산된 점수 표시 */}
-      <div className="bg-blue-50 p-4 rounded-lg text-center border border-blue-200">
-        <div className="text-sm text-blue-600 mb-1 font-medium">계산된 점수</div>
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-center">
+        <div className="mb-1 text-sm font-medium text-blue-600">계산된 점수</div>
         <div className="text-3xl font-bold text-blue-700">{calculatedScore}점</div>
-        <div className="text-xs text-blue-500 mt-1">
+        <div className="mt-1 text-xs text-blue-500">
           {diceValue} × {diceCount} = {calculatedScore}
         </div>
       </div>
 
       {/* 제출 버튼 */}
-      <div className="flex gap-2 w-full">
-        <Button className="h-12 text-base xs:text-lg font-bold" onClick={() => onScoreSubmit(0)} variant="outline">
+      <div className="flex w-full gap-2">
+        <Button className="xs:text-lg h-12 text-base font-bold" onClick={() => onScoreSubmit(0)} variant="outline">
           포기 (0점)
         </Button>
         <Button
-          className="flex-1 h-12 text-base xs:text-lg font-bold"
+          className="xs:text-lg h-12 flex-1 text-base font-bold"
           disabled={diceCount === 0}
           onClick={() => onScoreSubmit(calculatedScore)}
         >
-          <Target className="h-5 w-5 mr-1" />
+          <Target className="mr-1 h-5 w-5" />
           제출하기 ({calculatedScore}점)
         </Button>
       </div>
@@ -353,18 +353,18 @@ const LowerSectionDialog = ({
   return (
     <Dialog key={category} onOpenChange={setIsOpen} open={isOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] w-[95vw] max-w-md overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {CATEGORY_NAMES[category]}
             {/* 확장 룰 표시 */}
             {category === 'threeOfAKind' && extendedRules.enableThreeOfAKind && (
-              <Badge className="text-xs bg-orange-100 text-orange-800" variant="outline">
+              <Badge className="bg-orange-100 text-xs text-orange-800" variant="outline">
                 확장 룰
               </Badge>
             )}
             {category === 'fullHouse' && extendedRules.fullHouseFixedScore && (
-              <Badge className="text-xs bg-orange-100 text-orange-800" variant="outline">
+              <Badge className="bg-orange-100 text-xs text-orange-800" variant="outline">
                 고정 25점
               </Badge>
             )}
@@ -449,14 +449,14 @@ const YesNoInput = ({
   return (
     <div className="space-y-6">
       {/* 족보 설명 */}
-      <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
-        <p className="text-green-700 font-bold text-center">{description}</p>
+      <div className="rounded-lg border border-green-200 bg-gradient-to-br from-green-50 to-green-100 p-4">
+        <p className="text-center font-bold text-green-700">{description}</p>
         {examples && (
-          <div className="space-y-1 mt-3">
-            <div className="text-sm text-green-600 font-medium">예시:</div>
+          <div className="mt-3 space-y-1">
+            <div className="text-sm font-medium text-green-600">예시:</div>
             {examples.map((example, idx) => (
               <div
-                className="text-green-600 bg-white/50 px-2 py-1 rounded flex items-center gap-1 justify-center"
+                className="flex items-center justify-center gap-1 rounded bg-white/50 px-2 py-1 text-green-600"
                 key={idx}
               >
                 {example.map((dice, index) => (
@@ -470,23 +470,23 @@ const YesNoInput = ({
 
       {/* 질문 */}
       <div className="text-center">
-        <p className="text-lg font-medium text-gray-800 mb-4">위 조건에 맞는 주사위가 나왔나요?</p>
+        <p className="mb-4 text-lg font-medium text-gray-800">위 조건에 맞는 주사위가 나왔나요?</p>
       </div>
 
       {/* 버튼 */}
-      <div className="flex gap-3 w-full">
+      <div className="flex w-full gap-3">
         <Button
-          className="h-14 text-base xs:text-lg font-bold bg-gray-100 hover:bg-gray-200 text-gray-700"
+          className="xs:text-lg h-14 bg-gray-100 text-base font-bold text-gray-700 hover:bg-gray-200"
           onClick={() => onScoreSubmit(0)}
           variant="outline"
         >
           포기 (0점)
         </Button>
         <Button
-          className="flex-1 h-14 text-base xs:text-lg font-bold bg-green-600 hover:bg-green-700"
+          className="xs:text-lg h-14 flex-1 bg-green-600 text-base font-bold hover:bg-green-700"
           onClick={() => onScoreSubmit(score)}
         >
-          <Target className="h-5 w-5 mr-2" />
+          <Target className="mr-2 h-5 w-5" />
           네! ({score}점)
         </Button>
       </div>
@@ -498,31 +498,31 @@ const YachtYesNoInput = ({ onScoreSubmit }: { onScoreSubmit: (score: number) => 
   return (
     <div className="space-y-6">
       {/* 족보 설명 */}
-      <div className="bg-gradient-to-br from-yellow-50 to-orange-100 p-4 rounded-lg border border-yellow-200">
-        <div className="text-center mb-3 text-xl font-bold text-orange-800">요트</div>
-        <p className="text-orange-700 text-center">같은 숫자 5개</p>
+      <div className="rounded-lg border border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-100 p-4">
+        <div className="mb-3 text-center text-xl font-bold text-orange-800">요트</div>
+        <p className="text-center text-orange-700">같은 숫자 5개</p>
       </div>
 
       {/* 축하 질문 */}
-      <div className="text-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-        <p className="text-lg font-medium text-gray-800 mb-2">요트가 나왔나요?</p>
+      <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-center">
+        <p className="mb-2 text-lg font-medium text-gray-800">요트가 나왔나요?</p>
         <p className="text-sm text-gray-600">게임의 최고 점수입니다!</p>
       </div>
 
       {/* 버튼 */}
       <div className="flex gap-3">
         <Button
-          className="flex-1 h-14 text-base xs:text-lg font-bold bg-gray-100 hover:bg-gray-200 text-gray-700"
+          className="xs:text-lg h-14 flex-1 bg-gray-100 text-base font-bold text-gray-700 hover:bg-gray-200"
           onClick={() => onScoreSubmit(0)}
           variant="outline"
         >
           포기 (0점)
         </Button>
         <Button
-          className="flex-1 h-14 text-base xs:text-lg font-bold bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg"
+          className="xs:text-lg h-14 flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-base font-bold text-white shadow-lg hover:from-yellow-600 hover:to-orange-600"
           onClick={() => onScoreSubmit(FIXED_SCORE_CATEGORIES.yacht)}
         >
-          <Target className="h-5 w-5 mr-2" />
+          <Target className="mr-2 h-5 w-5" />
           🎉 네! ({FIXED_SCORE_CATEGORIES.yacht}점)
         </Button>
       </div>
@@ -555,42 +555,42 @@ function DiceInput({
   return (
     <div className="space-y-4">
       {/* 족보 설명 */}
-      <div className="text-center bg-gray-50 p-3 rounded-lg text-sm font-medium text-gray-700">{description}</div>
+      <div className="rounded-lg bg-gray-50 p-3 text-center text-sm font-medium text-gray-700">{description}</div>
 
-      <div className="space-y-4 -mt-2">
+      <div className="-mt-2 space-y-4">
         {/* 주사위 입력 */}
         <div className="space-y-3">
           <div className="flex items-center justify-center gap-2">
             {dice.map((value, index) => (
               <div className="flex flex-col items-center gap-1" key={index}>
                 <div className="text-xs text-gray-500">{index + 1}</div>
-                <div className="h-8 w-8 flex items-center justify-center bg-blue-100 border border-blue-300 rounded">
+                <div className="flex h-8 w-8 items-center justify-center rounded border border-blue-300 bg-blue-100">
                   <DiceIcon value={value} />
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="bg-gray-50 p-2 rounded-lg border border-gray-200 max-w-xs mx-auto w-fit">
-            <div className="grid grid-cols-[10px_repeat(6,1fr)] gap-[6px] items-center">
+          <div className="mx-auto w-fit max-w-xs rounded-lg border border-gray-200 bg-gray-50 p-2">
+            <div className="grid grid-cols-[10px_repeat(6,1fr)] items-center gap-[6px]">
               {/* 주사위 선택 행들 */}
               {dice.map((selectedValue, diceIndex) => (
                 <React.Fragment key={diceIndex}>
-                  <div className="text-xs font-medium text-gray-600 text-center">{diceIndex + 1}</div>
+                  <div className="text-center text-xs font-medium text-gray-600">{diceIndex + 1}</div>
                   {ALL_DICE_VALUES.map(diceValue => (
                     <button
                       className={cn(
-                        'aspect-square w-full h-full flex items-center justify-center border rounded-lg transition-all duration-100 p-1',
+                        'flex aspect-square h-full w-full items-center justify-center rounded-lg border p-1 transition-all duration-100',
                         'active:scale-95',
                         selectedValue === diceValue
-                          ? 'bg-blue-500 border-blue-600 text-white shadow-sm'
-                          : 'bg-white border-gray-300 hover:border-blue-400 hover:bg-blue-50',
+                          ? 'border-blue-600 bg-blue-500 text-white shadow-sm'
+                          : 'border-gray-300 bg-white hover:border-blue-400 hover:bg-blue-50',
                       )}
                       key={`${diceIndex}${diceValue}`}
                       onClick={() => handleDiceClick(diceIndex, diceValue)}
                       type="button"
                     >
-                      <DiceIcon className="aspect-square w-full h-full max-h-6" value={diceValue} />
+                      <DiceIcon className="aspect-square h-full max-h-6 w-full" value={diceValue} />
                     </button>
                   ))}
                 </React.Fragment>
@@ -600,19 +600,19 @@ function DiceInput({
         </div>
 
         {/* 계산된 점수 표시 */}
-        <div className="bg-blue-50 p-4 rounded-lg text-center border border-blue-200">
-          <div className="text-sm text-blue-600 mb-1 font-medium">계산된 점수</div>
+        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-center">
+          <div className="mb-1 text-sm font-medium text-blue-600">계산된 점수</div>
           <div className="text-3xl font-bold text-blue-700">{calculatedScore}점</div>
         </div>
       </div>
 
       {/* 제출 버튼 */}
-      <div className="flex gap-2 w-full">
-        <Button className="h-12 text-base xs:text-lg font-bold" onClick={() => onScoreSubmit(0)} variant="outline">
+      <div className="flex w-full gap-2">
+        <Button className="xs:text-lg h-12 text-base font-bold" onClick={() => onScoreSubmit(0)} variant="outline">
           포기 (0점)
         </Button>
-        <Button className="flex-1 h-12 text-base xs:text-lg font-bold" onClick={() => onScoreSubmit(calculatedScore)}>
-          <Target className="h-5 w-5 mr-2" />
+        <Button className="xs:text-lg h-12 flex-1 text-base font-bold" onClick={() => onScoreSubmit(calculatedScore)}>
+          <Target className="mr-2 h-5 w-5" />
           제출하기 ({calculatedScore}점)
         </Button>
       </div>

@@ -3,8 +3,8 @@ import { Dice6 } from 'lucide-react'
 export function AppHeader() {
   return (
     <div className="text-center">
-      <div className="flex items-center justify-center gap-3 mb-4">
-        <div className="bg-white rounded-lg p-3 shadow-lg">
+      <div className="mb-4 flex items-center justify-center gap-3">
+        <div className="rounded-lg bg-white p-3 shadow-lg">
           <Dice6 className="h-12 w-12 text-blue-600" />
         </div>
         <div>

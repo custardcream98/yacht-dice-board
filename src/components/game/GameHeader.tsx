@@ -59,28 +59,28 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
   return (
     <div
       className={cn(
-        'bg-white shadow-sm border-b sticky top-0 z-20 transition-transform duration-200',
+        'sticky top-0 z-20 border-b bg-white shadow-sm transition-transform duration-200',
         isScrolled && 'translate-y-[-44px] sm:translate-y-[-48px]',
       )}
     >
       <div className="p-3 sm:p-4">
         {/* 상단 버튼 영역 - 스크롤 시 숨김 */}
         <div>
-          <div className="flex items-center justify-between mb-3">
+          <div className="mb-3 flex items-center justify-between">
             <Button
               className="text-gray-600 hover:text-gray-900"
               onClick={() => router.push('/')}
               size="sm"
               variant="ghost"
             >
-              <ArrowLeft className="h-4 w-4 mr-1" />홈
+              <ArrowLeft className="mr-1 h-4 w-4" />홈
             </Button>
             <div className="flex items-center gap-2">
               {/* 링크 공유 버튼 */}
               <Dialog onOpenChange={setIsShareDialogOpen} open={isShareDialogOpen}>
                 <DialogTrigger asChild>
                   <Button size="sm" variant="outline">
-                    <Share2 className="h-4 w-4 mr-1" />
+                    <Share2 className="mr-1 h-4 w-4" />
                     공유
                   </Button>
                 </DialogTrigger>
@@ -95,14 +95,14 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
                     <LinkShareButton icon={UserPlus} label="초대 링크" url={inviteUrl} />
 
                     <LinkShareButton icon={Monitor} label="전광판 링크" url={boardUrl} />
-                    <div className="text-xs text-gray-500 bg-green-50 p-2 rounded">
+                    <div className="rounded bg-green-50 p-2 text-xs text-gray-500">
                       📺 큰 화면에서 점수를 확인할 때 사용하세요.
                     </div>
 
                     <div className="flex gap-2 pt-2">
                       <Button asChild className="flex-1" variant="outline">
                         <Link href={boardUrl} rel="noopener noreferrer" target="_blank">
-                          <ExternalLink className="h-4 w-4 mr-1" />
+                          <ExternalLink className="mr-1 h-4 w-4" />
                           전광판 열기
                         </Link>
                       </Button>
@@ -118,7 +118,7 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
               <Dialog onOpenChange={setIsDeleteDialogOpen} open={isDeleteDialogOpen}>
                 <DialogTrigger asChild>
                   <Button size="sm" variant="destructive">
-                    <Trash2 className="h-4 w-4 mr-1" />
+                    <Trash2 className="mr-1 h-4 w-4" />
                     삭제
                   </Button>
                 </DialogTrigger>
@@ -129,12 +129,12 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
                     </DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <div className="rounded-lg border border-red-200 bg-red-50 p-3">
                       <div className="flex items-start gap-2">
-                        <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+                        <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-500" />
                         <div className="text-sm text-red-700">
-                          <p className="font-medium mb-2">정말로 이 방을 삭제하시겠습니까?</p>
-                          <ul className="list-disc list-inside space-y-1 text-xs">
+                          <p className="mb-2 font-medium">정말로 이 방을 삭제하시겠습니까?</p>
+                          <ul className="list-inside list-disc space-y-1 text-xs">
                             <li>모든 플레이어가 방에서 나가게 됩니다</li>
                             <li>게임 진행 상황과 점수가 모두 삭제됩니다</li>
                             <li>삭제 후에는 복구가 불가능합니다</li>
@@ -159,16 +159,16 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
 
         {/* 게임 정보 영역 - 항상 표시 */}
         <div className="text-center">
-          <h1 className="text-lg sm:text-xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-2">
+          <h1 className="mb-2 flex items-center justify-center gap-2 text-lg font-bold text-gray-800 sm:text-xl">
             {gameRoom.name}
-            <div className="flex items-center gap-1 text-xs text-gray-500 font-normal">
+            <div className="flex items-center gap-1 text-xs font-normal text-gray-500">
               <Users className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>{gameRoom.players.length}명</span>
             </div>
           </h1>
 
           {/* 기본 게임 정보 */}
-          <div className="flex items-center justify-center gap-2 sm:gap-4 text-xs sm:text-sm mb-2">
+          <div className="mb-2 flex items-center justify-center gap-2 text-xs sm:gap-4 sm:text-sm">
             <Badge className="text-xs" variant="outline">
               나: {myPlayer.name}
             </Badge>
@@ -185,17 +185,17 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
               <div className="flex items-center justify-center gap-2">
                 {/* 턴 상태 표시 */}
                 {isMyTurn ? (
-                  <div className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full inline-block">
+                  <div className="inline-block rounded-full bg-green-50 px-2 py-1 text-xs text-green-600">
                     ✨ 당신의 차례입니다!
                   </div>
                 ) : (
-                  <div className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-full inline-block">
-                    <Lock className="h-3 w-3 inline mr-1" />
+                  <div className="inline-block rounded-full bg-orange-50 px-2 py-1 text-xs text-orange-600">
+                    <Lock className="mr-1 inline h-3 w-3" />
                     {currentPlayer.name}님의 차례
                   </div>
                 )}
                 {gameRoom.currentRound === 1 && (
-                  <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full inline-block">
+                  <div className="inline-block rounded-full bg-blue-50 px-2 py-1 text-xs text-blue-600">
                     🎲 순서가 랜덤하게 섞였습니다
                   </div>
                 )}

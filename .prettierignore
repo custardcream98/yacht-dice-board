@@ -1,0 +1,4 @@
+src/lib/utils.ts
+src/components/ui/**/*
+components.json
+pnpm-lock.yaml

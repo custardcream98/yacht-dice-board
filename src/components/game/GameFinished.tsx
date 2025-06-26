@@ -78,22 +78,22 @@ export function GameFinished({ gameRoom, myPlayer, onRestartGame }: GameFinished
       {rankingDisplay && (
         <Card className={`${rankingDisplay.bgColor} ${rankingDisplay.borderColor} border-2`}>
           <CardHeader>
-            <CardTitle className={`text-center flex items-center justify-center gap-3 ${rankingDisplay.textColor}`}>
+            <CardTitle className={`flex items-center justify-center gap-3 text-center ${rankingDisplay.textColor}`}>
               {rankingDisplay.icon}
               <div>
-                <div className="text-3xl mb-1">{rankingDisplay.emoji}</div>
+                <div className="mb-1 text-3xl">{rankingDisplay.emoji}</div>
                 <div className="text-xl font-bold">{rankingDisplay.title}</div>
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-center">
-              <p className={`text-lg mb-4 ${rankingDisplay.textColor}`}>{rankingDisplay.message}</p>
+              <p className={`mb-4 text-lg ${rankingDisplay.textColor}`}>{rankingDisplay.message}</p>
 
               {/* 내 최종 점수 */}
-              <div className="bg-white/70 rounded-lg p-4 mb-4">
-                <div className="text-sm text-gray-600 mb-2">내 최종 점수</div>
-                <div className="text-4xl font-bold text-gray-800 mb-2">{myTotalScore}점</div>
+              <div className="mb-4 rounded-lg bg-white/70 p-4">
+                <div className="mb-2 text-sm text-gray-600">내 최종 점수</div>
+                <div className="mb-2 text-4xl font-bold text-gray-800">{myTotalScore}점</div>
                 <div className="text-sm text-gray-600">
                   {gameRoom.players.length}명 중 {myRanking}등
                   {rankings.filter(p => p.ranking === myRanking).length > 1 &&
@@ -103,19 +103,19 @@ export function GameFinished({ gameRoom, myPlayer, onRestartGame }: GameFinished
 
               {/* 점수 상세 분석 */}
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="bg-white/50 rounded-lg p-3">
+                <div className="rounded-lg bg-white/50 p-3">
                   <div className="text-gray-600">상위 섹션</div>
                   <div className="text-lg font-bold">{upperSectionTotal}점</div>
                 </div>
-                <div className="bg-white/50 rounded-lg p-3">
+                <div className="rounded-lg bg-white/50 p-3">
                   <div className="text-gray-600">보너스</div>
                   <div className="text-lg font-bold text-blue-600">{bonus}점</div>
                 </div>
-                <div className="bg-white/50 rounded-lg p-3">
+                <div className="rounded-lg bg-white/50 p-3">
                   <div className="text-gray-600">하위 섹션</div>
                   <div className="text-lg font-bold">{lowerSectionTotal}점</div>
                 </div>
-                <div className="bg-white/50 rounded-lg p-3">
+                <div className="rounded-lg bg-white/50 p-3">
                   <div className="text-gray-600">총합</div>
                   <div className="text-lg font-bold text-green-600">{myTotalScore}점</div>
                 </div>
@@ -128,30 +128,30 @@ export function GameFinished({ gameRoom, myPlayer, onRestartGame }: GameFinished
       {/* 게임 종료 정보 및 전광판 버튼 */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-center flex items-center justify-center gap-2">
+          <CardTitle className="flex items-center justify-center gap-2 text-center">
             <Trophy className="h-6 w-6 text-yellow-500" />
             게임 종료
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center space-y-4">
+          <div className="space-y-4 text-center">
             {/* 우승자 정보 */}
             {winners.length > 0 && (
-              <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-                <div className="text-lg mb-2">
+              <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                <div className="mb-2 text-lg">
                   🏆 {winners.length > 1 ? `공동 우승자 (${winners.length}명)` : '우승자'}
                 </div>
                 {winners.length === 1 ? (
                   <>
-                    <div className="font-bold text-xl text-yellow-800">{winners[0].player.name}</div>
-                    <div className="text-lg font-mono text-yellow-700">{winners[0].totalScore}점</div>
+                    <div className="text-xl font-bold text-yellow-800">{winners[0].player.name}</div>
+                    <div className="font-mono text-lg text-yellow-700">{winners[0].totalScore}점</div>
                   </>
                 ) : (
                   <div className="space-y-2">
                     {winners.map(winner => (
-                      <div className="flex justify-between items-center" key={winner.player.name}>
-                        <div className="font-bold text-lg text-yellow-800">{winner.player.name}</div>
-                        <div className="text-lg font-mono text-yellow-700">{winner.totalScore}점</div>
+                      <div className="flex items-center justify-between" key={winner.player.name}>
+                        <div className="text-lg font-bold text-yellow-800">{winner.player.name}</div>
+                        <div className="font-mono text-lg text-yellow-700">{winner.totalScore}점</div>
                       </div>
                     ))}
                   </div>
@@ -160,9 +160,9 @@ export function GameFinished({ gameRoom, myPlayer, onRestartGame }: GameFinished
             )}
 
             <div className="space-y-3">
-              <Button asChild className="w-full h-12 text-lg font-bold">
+              <Button asChild className="h-12 w-full text-lg font-bold">
                 <Link href={`/board/${gameRoom.id}`}>
-                  <TrendingUp className="h-5 w-5 mr-2" />
+                  <TrendingUp className="mr-2 h-5 w-5" />
                   전광판에서 전체 결과 보기
                 </Link>
               </Button>
@@ -196,8 +196,8 @@ const RestartGameDialog = ({
   return (
     <Dialog onOpenChange={setIsRestartDialogOpen} open={isRestartDialogOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full h-12 text-lg font-bold" variant="outline">
-          <RotateCcw className="h-5 w-5 mr-2" />새 게임 시작하기
+        <Button className="h-12 w-full text-lg font-bold" variant="outline">
+          <RotateCcw className="mr-2 h-5 w-5" />새 게임 시작하기
         </Button>
       </DialogTrigger>
       <DialogContent className="w-[95vw] max-w-md">
@@ -208,8 +208,8 @@ const RestartGameDialog = ({
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <p className="text-lg mb-2">정말로 새 게임을 시작하시겠습니까?</p>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="mb-2 text-lg">정말로 새 게임을 시작하시겠습니까?</p>
+          <p className="mb-4 text-sm text-gray-600">
             현재 게임의 모든 점수가 초기화되고, 새로운 순서로 게임이 시작됩니다.
           </p>
           <ExtendedRuleCheckboxes
@@ -226,7 +226,7 @@ const RestartGameDialog = ({
               취소
             </Button>
             <Button className="flex-1" disabled={isRestarting} onClick={handleRestartGame}>
-              <RotateCcw className="h-4 w-4 mr-2" />새 게임 시작
+              <RotateCcw className="mr-2 h-4 w-4" />새 게임 시작
             </Button>
           </div>
         </div>

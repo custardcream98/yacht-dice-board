@@ -43,7 +43,7 @@ export function QRCodeShareButton({ roomId, className }: QRCodeShareButtonProps)
     <Dialog onOpenChange={setIsOpen} open={isOpen}>
       <DialogTrigger asChild>
         <Button className={className} size="sm" variant="outline">
-          <QrCode className="h-4 w-4 mr-2" />
+          <QrCode className="mr-2 h-4 w-4" />
           QR 코드
         </Button>
       </DialogTrigger>
@@ -57,12 +57,12 @@ export function QRCodeShareButton({ roomId, className }: QRCodeShareButtonProps)
 
         <div className="space-y-4">
           {/* QR 코드 */}
-          <div className="flex justify-center p-4 bg-white rounded-lg border">
+          <div className="flex justify-center rounded-lg border bg-white p-4">
             <QRCodeSVG bgColor="#ffffff" fgColor="#000000" level="M" marginSize={0} size={200} value={inviteUrl} />
           </div>
 
           {/* 설명 텍스트 */}
-          <div className="text-center space-y-2">
+          <div className="space-y-2 text-center">
             <p className="text-sm text-gray-600">스마트폰으로 QR 코드를 스캔하면</p>
             <p className="text-sm font-medium text-gray-800">게임에 바로 참여할 수 있어요!</p>
           </div>
@@ -71,7 +71,7 @@ export function QRCodeShareButton({ roomId, className }: QRCodeShareButtonProps)
           <div className="space-y-2">
             <div className="text-xs text-gray-500">초대 링크:</div>
             <div className="flex gap-2">
-              <div className="flex-1 p-2 bg-gray-50 rounded text-xs font-mono break-all">{inviteUrl}</div>
+              <div className="flex-1 rounded bg-gray-50 p-2 font-mono text-xs break-all">{inviteUrl}</div>
               <Button
                 className="flex-shrink-0"
                 onClick={copyToClipboard}
@@ -80,12 +80,12 @@ export function QRCodeShareButton({ roomId, className }: QRCodeShareButtonProps)
               >
                 {copied ? (
                   <>
-                    <Check className="h-3 w-3 mr-1" />
+                    <Check className="mr-1 h-3 w-3" />
                     복사됨
                   </>
                 ) : (
                   <>
-                    <Copy className="h-3 w-3 mr-1" />
+                    <Copy className="mr-1 h-3 w-3" />
                     복사
                   </>
                 )}
