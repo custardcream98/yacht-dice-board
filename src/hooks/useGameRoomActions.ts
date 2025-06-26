@@ -93,7 +93,7 @@ export function useGameRoomActions() {
       }
 
       const newPlayer: Player = {
-        id: `player_${Date.now()}`,
+        id: generatePlayerId(),
         name: playerName,
         scores: {},
       }
@@ -137,4 +137,10 @@ export function useGameRoomActions() {
     joinRoom,
     deleteRoom,
   }
+}
+
+const generatePlayerId = (): string => {
+  const timestamp = Date.now().toString(36)
+  const randomPart = Math.random().toString(36).substring(2, 8)
+  return `player_${timestamp}_${randomPart}`
 }
