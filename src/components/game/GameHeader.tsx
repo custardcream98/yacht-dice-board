@@ -183,12 +183,6 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
           {gameRoom.status === 'playing' && currentPlayer && (
             <div className="space-y-1">
               <div className="flex items-center justify-center gap-2">
-                <span className="text-xs text-gray-600">현재 차례:</span>
-                <Badge className="text-xs" variant={isMyTurn ? 'outline' : 'secondary'}>
-                  {currentPlayer.name}
-                  {isMyTurn && ' (나)'}
-                </Badge>
-
                 {/* 턴 상태 표시 */}
                 {isMyTurn ? (
                   <div className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full inline-block">
@@ -200,13 +194,12 @@ export function GameHeader({ gameRoom, myPlayer, currentPlayer, isMyTurn, onDele
                     {currentPlayer.name}님의 차례
                   </div>
                 )}
+                {gameRoom.currentRound === 1 && (
+                  <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full inline-block">
+                    🎲 순서가 랜덤하게 섞였습니다
+                  </div>
+                )}
               </div>
-
-              {gameRoom.currentRound === 1 && (
-                <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full inline-block">
-                  🎲 순서가 랜덤하게 섞였습니다
-                </div>
-              )}
             </div>
           )}
         </div>
