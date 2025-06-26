@@ -1,5 +1,5 @@
 import { Calculator, Lock, Target, Plus, Minus, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6 } from 'lucide-react'
-import { useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -18,9 +18,9 @@ import { YachtDiceCalculator, CATEGORY_NAMES } from '@/lib/yacht-dice-rules'
 import { ScoreCategory, Player, ExtendedRules, DiceValue, DiceHand } from '@/types/game'
 
 const DICE_ICONS = [Dice1, Dice2, Dice3, Dice4, Dice5, Dice6] as const
-const DiceIcon = ({ value }: { value: DiceValue }) => {
+const DiceIcon = ({ value, className }: { value: DiceValue; className?: string }) => {
   const Icon = DICE_ICONS[value - 1]
-  return <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+  return <Icon className={cn('h-5 w-5 sm:h-6 sm:w-6', className)} />
 }
 
 interface ScoreInputProps {
@@ -531,6 +531,7 @@ const YachtYesNoInput = ({ onScoreSubmit }: { onScoreSubmit: (score: number) => 
 }
 
 const INITIAL_DICE = [1, 1, 1, 1, 1] as const satisfies DiceHand
+const ALL_DICE_VALUES = [1, 2, 3, 4, 5, 6] as const satisfies DiceValue[]
 function DiceInput({
   description,
   calculateScore,
@@ -543,18 +544,10 @@ function DiceInput({
 
   const calculatedScore = useMemo(() => calculateScore(dice), [dice, calculateScore])
 
-  const incrementDice = useCallback((index: number) => {
+  const handleDiceClick = useCallback((index: number, value: DiceValue) => {
     setDice(prevDice => {
       const newDice: DiceHand = [...prevDice]
-      newDice[index] = (prevDice[index] + 1) as DiceValue
-      return newDice
-    })
-  }, [])
-
-  const decrementDice = useCallback((index: number) => {
-    setDice(prevDice => {
-      const newDice: DiceHand = [...prevDice]
-      newDice[index] = (prevDice[index] - 1) as DiceValue
+      newDice[index] = value
       return newDice
     })
   }, [])
@@ -564,36 +557,46 @@ function DiceInput({
       {/* 족보 설명 */}
       <div className="text-center bg-gray-50 p-3 rounded-lg text-sm font-medium text-gray-700">{description}</div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 -mt-2">
         {/* 주사위 입력 */}
-        <div className="grid grid-cols-5 gap-2">
-          {dice.map((value, index) => (
-            <div className="text-center" key={index}>
-              <div className="flex flex-col gap-1">
-                <Button
-                  className="h-8 w-full p-0"
-                  disabled={value >= 6}
-                  onClick={() => incrementDice(index)}
-                  size="sm"
-                  variant="outline"
-                >
-                  <Plus className="h-3 w-3" />
-                </Button>
-                <div className="flex items-center justify-center h-16 border-2 border-gray-300 rounded-lg bg-white">
+        <div className="space-y-3">
+          <div className="flex items-center justify-center gap-2">
+            {dice.map((value, index) => (
+              <div className="flex flex-col items-center gap-1" key={index}>
+                <div className="text-xs text-gray-500">{index + 1}</div>
+                <div className="h-8 w-8 flex items-center justify-center bg-blue-100 border border-blue-300 rounded">
                   <DiceIcon value={value} />
                 </div>
-                <Button
-                  className="h-8 w-full p-0"
-                  disabled={value <= 1}
-                  onClick={() => decrementDice(index)}
-                  size="sm"
-                  variant="outline"
-                >
-                  <Minus className="h-3 w-3" />
-                </Button>
               </div>
+            ))}
+          </div>
+
+          <div className="bg-gray-50 p-2 rounded-lg border border-gray-200 max-w-xs mx-auto">
+            <div className="grid grid-cols-[10px_repeat(6,1fr)] gap-[6px] items-center">
+              {/* 주사위 선택 행들 */}
+              {dice.map((selectedValue, diceIndex) => (
+                <React.Fragment key={diceIndex}>
+                  <div className="text-xs font-medium text-gray-600 text-center">{diceIndex + 1}</div>
+                  {ALL_DICE_VALUES.map(diceValue => (
+                    <button
+                      className={cn(
+                        'aspect-square w-full h-full flex items-center justify-center border rounded-lg transition-all duration-100',
+                        'active:scale-95',
+                        selectedValue === diceValue
+                          ? 'bg-blue-500 border-blue-600 text-white shadow-sm'
+                          : 'bg-white border-gray-300 hover:border-blue-400 hover:bg-blue-50',
+                      )}
+                      key={`${diceIndex}${diceValue}`}
+                      onClick={() => handleDiceClick(diceIndex, diceValue)}
+                      type="button"
+                    >
+                      <DiceIcon className="aspect-square w-full h-full max-h-6" value={diceValue} />
+                    </button>
+                  ))}
+                </React.Fragment>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
 
         {/* 계산된 점수 표시 */}
