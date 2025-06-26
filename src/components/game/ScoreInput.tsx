@@ -14,7 +14,13 @@ import {
 } from '@/constants/game'
 import { useAsyncHandler } from '@/hooks/useAsyncHandler'
 import { FirebaseCustomError } from '@/lib/firebase/error'
-import { gameActions, isSubmitScoreErrorCode, SUBMIT_SCORE_ERROR_CODES } from '@/lib/firebase/game'
+import {
+  gameActions,
+  isSubmitScoreErrorCode,
+  SUBMIT_SCORE_ERROR_CODES,
+  isUpdateScoreErrorCode,
+  UPDATE_SCORE_ERROR_CODES,
+} from '@/lib/firebase/game'
 import { exhaustiveCheck } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { YachtDiceCalculator, CATEGORY_NAMES } from '@/lib/yacht-dice-rules'
@@ -39,18 +45,59 @@ const SUBMIT_SCORE_ERROR_MESSAGES = {
   [SUBMIT_SCORE_ERROR_CODES.CATEGORY_ALREADY_SCORED]: '이미 점수가 있습니다.',
 } as const
 
+const UPDATE_SCORE_ERROR_MESSAGES = {
+  [UPDATE_SCORE_ERROR_CODES.ROOM_NOT_FOUND]: '존재하지 않는 방입니다.',
+  [UPDATE_SCORE_ERROR_CODES.PLAYER_NOT_FOUND]: '플레이어를 찾을 수 없습니다.',
+} as const
+
+const EditModeIndicator = ({ isScored, currentScore }: { isScored: boolean; currentScore?: number }) => {
+  if (!isScored) return null
+
+  return (
+    <div className="space-y-2">
+      <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-center">
+        <div className="mb-1 text-sm font-medium text-orange-700">점수 수정 모드</div>
+        <div className="text-xs text-orange-600">현재 점수: {currentScore}점</div>
+      </div>
+
+      <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+        <div className="mb-1 flex items-center justify-center gap-1 text-sm font-medium text-red-700">⚠️ 주의사항</div>
+        <div className="text-xs leading-relaxed text-red-600">
+          <div className="mb-1">• 요트 다이스는 원래 점수 수정이 불가능한 게임입니다</div>
+          <div>• 실수로 점수를 잘못 입력했을 때만 사용해주세요</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function ScoreInput({ extendedRules, myPlayer, isMyTurn, roomId }: ScoreInputProps) {
   const { handleAsync: submitScore, isPending: isSubmitScorePending } = useAsyncHandler(gameActions.submitScore)
+  const { handleAsync: updateScore, isPending: isUpdateScorePending } = useAsyncHandler(gameActions.updateScore)
+
+  const isScoreActionPending = isSubmitScorePending || isUpdateScorePending
 
   const handleScoreSubmit = async (category: ScoreCategory, score: number) => {
+    const isScored = myPlayer?.scores[category] !== undefined
+
     try {
-      await submitScore({ roomId, playerId: myPlayer.id, category, score })
+      if (isScored) {
+        await updateScore({ roomId, playerId: myPlayer.id, category, score })
+      } else {
+        await submitScore({ roomId, playerId: myPlayer.id, category, score })
+      }
     } catch (err) {
-      alert(
-        err instanceof FirebaseCustomError && isSubmitScoreErrorCode(err.code)
-          ? SUBMIT_SCORE_ERROR_MESSAGES[err.code]
-          : '점수 입력에 실패했습니다.',
-      )
+      if (err instanceof FirebaseCustomError) {
+        if (isSubmitScoreErrorCode(err.code)) {
+          alert(SUBMIT_SCORE_ERROR_MESSAGES[err.code])
+        } else if (isUpdateScoreErrorCode(err.code)) {
+          alert(UPDATE_SCORE_ERROR_MESSAGES[err.code])
+        } else {
+          alert('점수 입력에 실패했습니다.')
+        }
+      } else {
+        alert('점수 입력에 실패했습니다.')
+      }
     }
   }
 
@@ -90,22 +137,23 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, roomId }: ScoreI
               const isWaitingTurn = !isMyTurn
 
               return (
-                <UpperSectionDialog category={category} key={category} onScoreSubmit={handleScoreSubmit}>
+                <UpperSectionDialog
+                  category={category}
+                  currentScore={score}
+                  isScored={isScored}
+                  key={category}
+                  onScoreSubmit={handleScoreSubmit}
+                >
                   <Button
                     className={cn(
                       'relative flex h-16 flex-col items-center justify-center overflow-hidden p-2',
                       isWaitingTurn
                         ? 'cursor-not-allowed opacity-50'
                         : isScored
-                          ? 'transform cursor-not-allowed border-blue-300 bg-gradient-to-br from-blue-100 to-blue-200 shadow-md'
+                          ? 'transform border-blue-300 bg-gradient-to-br from-blue-100 to-blue-200 shadow-md hover:from-blue-200 hover:to-blue-300'
                           : 'hover:border-blue-300 hover:bg-blue-50',
                     )}
-                    disabled={isWaitingTurn || isSubmitScorePending}
-                    onClick={event => {
-                      if (isScored) {
-                        event.preventDefault()
-                      }
-                    }}
+                    disabled={isWaitingTurn || isScoreActionPending}
                     variant={isScored ? 'secondary' : 'outline'}
                   >
                     {isScored && (
@@ -148,7 +196,9 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, roomId }: ScoreI
               return (
                 <LowerSectionDialog
                   category={category}
+                  currentScore={score}
                   extendedRules={extendedRules}
+                  isScored={isScored}
                   key={category}
                   onScoreSubmit={handleScoreSubmit}
                 >
@@ -158,15 +208,10 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, roomId }: ScoreI
                       isWaitingTurn
                         ? 'cursor-not-allowed opacity-50'
                         : isScored
-                          ? 'transform cursor-not-allowed border-green-300 bg-gradient-to-br from-green-100 to-green-200 shadow-md'
+                          ? 'transform border-green-300 bg-gradient-to-br from-green-100 to-green-200 shadow-md hover:from-green-200 hover:to-green-300'
                           : 'hover:border-green-300 hover:bg-green-50',
                     )}
-                    disabled={isWaitingTurn || isSubmitScorePending}
-                    onClick={event => {
-                      if (isScored) {
-                        event.preventDefault()
-                      }
-                    }}
+                    disabled={isWaitingTurn || isScoreActionPending}
                     variant={isScored ? 'secondary' : 'outline'}
                   >
                     {isScored && (
@@ -205,10 +250,14 @@ export function ScoreInput({ extendedRules, myPlayer, isMyTurn, roomId }: ScoreI
 const UpperSectionDialog = ({
   category,
   onScoreSubmit,
+  currentScore,
+  isScored,
   children,
 }: React.PropsWithChildren<{
   category: (typeof UPPER_SECTION_CATEGORIES)[number]
   onScoreSubmit: (category: ScoreCategory, score: number) => void
+  currentScore?: number
+  isScored: boolean
 }>) => {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -224,6 +273,8 @@ const UpperSectionDialog = ({
         </DialogHeader>
         <UpperSectionInput
           category={category}
+          currentScore={currentScore}
+          isScored={isScored}
           onScoreSubmit={score => {
             onScoreSubmit(category, score)
             setIsOpen(false)
@@ -245,11 +296,24 @@ const DICE_VALUE_TO_JOSA = {
 const UpperSectionInput = ({
   category,
   onScoreSubmit,
+  currentScore,
+  isScored,
 }: {
   category: (typeof UPPER_SECTION_CATEGORIES)[number]
   onScoreSubmit: (score: number) => void
+  currentScore?: number
+  isScored: boolean
 }) => {
-  const [diceCount, setDiceCount] = useState(0)
+  // 현재 점수가 있으면 역산하여 초기 주사위 개수 설정
+  const initialDiceCount = useMemo(() => {
+    if (isScored && currentScore !== undefined) {
+      const diceValue = UPPER_SECTION_DICE_COUNT[category]
+      return Math.floor(currentScore / diceValue)
+    }
+    return 0
+  }, [isScored, currentScore, category])
+
+  const [diceCount, setDiceCount] = useState(initialDiceCount)
 
   const increment = () => setDiceCount(prev => prev + 1)
   const decrement = () => setDiceCount(prev => prev - 1)
@@ -263,6 +327,8 @@ const UpperSectionInput = ({
 
   return (
     <div className="space-y-6">
+      <EditModeIndicator currentScore={currentScore} isScored={isScored} />
+
       <div className="rounded-lg bg-gray-50 p-3 text-center">
         <div className="mb-1 text-sm font-medium text-gray-700">
           {diceValue} {DICE_VALUE_TO_JOSA[diceValue]} 나온 주사위 개수를 입력하세요
@@ -317,7 +383,7 @@ const UpperSectionInput = ({
           onClick={() => onScoreSubmit(calculatedScore)}
         >
           <Target className="mr-1 h-5 w-5" />
-          제출하기 ({calculatedScore}점)
+          {isScored ? '수정하기' : '제출하기'} ({calculatedScore}점)
         </Button>
       </div>
     </div>
@@ -365,11 +431,15 @@ const LowerSectionDialog = ({
   category,
   extendedRules,
   onScoreSubmit,
+  currentScore,
+  isScored,
   children,
 }: React.PropsWithChildren<{
   category: (typeof LOWER_SECTION_CATEGORIES)[number]
   extendedRules: ExtendedRules
   onScoreSubmit: (category: ScoreCategory, score: number) => void
+  currentScore?: number
+  isScored: boolean
 }>) => {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -406,6 +476,8 @@ const LowerSectionDialog = ({
                   <DiceInput
                     {...THREE_OF_A_KIND_INFO}
                     calculateScore={YachtDiceCalculator.calculateThreeOfAKind}
+                    currentScore={currentScore}
+                    isScored={isScored}
                     onScoreSubmit={handleSubmit}
                   />
                 )
@@ -414,33 +486,60 @@ const LowerSectionDialog = ({
                   <DiceInput
                     {...FOUR_OF_A_KIND_INFO}
                     calculateScore={YachtDiceCalculator.calculateFourOfAKind}
+                    currentScore={currentScore}
+                    isScored={isScored}
                     onScoreSubmit={handleSubmit}
                   />
                 )
               case 'fullHouse': {
                 if (extendedRules.fullHouseFixedScore) {
-                  return <YesNoInput {...FULL_HOUSE_INFO} onScoreSubmit={handleSubmit} />
+                  return (
+                    <YesNoInput
+                      {...FULL_HOUSE_INFO}
+                      currentScore={currentScore}
+                      isScored={isScored}
+                      onScoreSubmit={handleSubmit}
+                    />
+                  )
                 } else {
                   return (
                     <DiceInput
                       calculateScore={YachtDiceCalculator.calculateFullHouse}
+                      currentScore={currentScore}
                       description={FULL_HOUSE_INFO.description}
+                      isScored={isScored}
                       onScoreSubmit={handleSubmit}
                     />
                   )
                 }
               }
               case 'smallStraight':
-                return <YesNoInput {...SMALL_STRAIGHT_INFO} onScoreSubmit={handleSubmit} />
+                return (
+                  <YesNoInput
+                    {...SMALL_STRAIGHT_INFO}
+                    currentScore={currentScore}
+                    isScored={isScored}
+                    onScoreSubmit={handleSubmit}
+                  />
+                )
               case 'largeStraight':
-                return <YesNoInput {...LARGE_STRAIGHT_INFO} onScoreSubmit={handleSubmit} />
+                return (
+                  <YesNoInput
+                    {...LARGE_STRAIGHT_INFO}
+                    currentScore={currentScore}
+                    isScored={isScored}
+                    onScoreSubmit={handleSubmit}
+                  />
+                )
               case 'yacht':
-                return <YachtYesNoInput onScoreSubmit={handleSubmit} />
+                return <YachtYesNoInput currentScore={currentScore} isScored={isScored} onScoreSubmit={handleSubmit} />
               case 'chance':
                 return (
                   <DiceInput
                     {...CHANCE_INFO}
                     calculateScore={YachtDiceCalculator.calculateChance}
+                    currentScore={currentScore}
+                    isScored={isScored}
                     onScoreSubmit={handleSubmit}
                   />
                 )
@@ -468,9 +567,17 @@ const YesNoInput = ({
   examples,
   score,
   onScoreSubmit,
-}: YesNoInputInfo & { onScoreSubmit: (score: number) => void }) => {
+  currentScore,
+  isScored,
+}: YesNoInputInfo & {
+  onScoreSubmit: (score: number) => void
+  currentScore?: number
+  isScored: boolean
+}) => {
   return (
     <div className="space-y-6">
+      <EditModeIndicator currentScore={currentScore} isScored={isScored} />
+
       {/* 족보 설명 */}
       <div className="rounded-lg border border-green-200 bg-gradient-to-br from-green-50 to-green-100 p-4">
         <p className="text-center font-bold text-green-700">{description}</p>
@@ -510,16 +617,26 @@ const YesNoInput = ({
           onClick={() => onScoreSubmit(score)}
         >
           <Target className="mr-2 h-5 w-5" />
-          네! ({score}점)
+          {isScored ? '수정하기' : '네!'} ({score}점)
         </Button>
       </div>
     </div>
   )
 }
 
-const YachtYesNoInput = ({ onScoreSubmit }: { onScoreSubmit: (score: number) => void }) => {
+const YachtYesNoInput = ({
+  onScoreSubmit,
+  currentScore,
+  isScored,
+}: {
+  onScoreSubmit: (score: number) => void
+  currentScore?: number
+  isScored: boolean
+}) => {
   return (
     <div className="space-y-6">
+      <EditModeIndicator currentScore={currentScore} isScored={isScored} />
+
       {/* 족보 설명 */}
       <div className="rounded-lg border border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-100 p-4">
         <div className="mb-3 text-center text-xl font-bold text-orange-800">요트</div>
@@ -546,7 +663,7 @@ const YachtYesNoInput = ({ onScoreSubmit }: { onScoreSubmit: (score: number) => 
           onClick={() => onScoreSubmit(FIXED_SCORE_CATEGORIES.yacht)}
         >
           <Target className="mr-2 h-5 w-5" />
-          🎉 네! ({FIXED_SCORE_CATEGORIES.yacht}점)
+          🎉 {isScored ? '수정하기' : '네!'} ({FIXED_SCORE_CATEGORIES.yacht}점)
         </Button>
       </div>
     </div>
@@ -559,9 +676,13 @@ function DiceInput({
   description,
   calculateScore,
   onScoreSubmit,
+  currentScore,
+  isScored,
 }: HandInfo & {
   calculateScore: (dice: DiceHand) => number
   onScoreSubmit: (score: number) => void
+  currentScore?: number
+  isScored: boolean
 }) {
   const [dice, setDice] = useState<DiceHand>(INITIAL_DICE)
 
@@ -577,6 +698,8 @@ function DiceInput({
 
   return (
     <div className="space-y-4">
+      <EditModeIndicator currentScore={currentScore} isScored={isScored} />
+
       {/* 족보 설명 */}
       <div className="rounded-lg bg-gray-50 p-3 text-center text-sm font-medium text-gray-700">{description}</div>
 
@@ -636,7 +759,7 @@ function DiceInput({
         </Button>
         <Button className="xs:text-lg h-12 flex-1 text-base font-bold" onClick={() => onScoreSubmit(calculatedScore)}>
           <Target className="mr-2 h-5 w-5" />
-          제출하기 ({calculatedScore}점)
+          {isScored ? '수정하기' : '제출하기'} ({calculatedScore}점)
         </Button>
       </div>
     </div>

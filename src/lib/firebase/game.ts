@@ -146,8 +146,50 @@ const restartGame = async ({ roomId, extendedRules }: { roomId: string; extended
   })
 }
 
+export const UPDATE_SCORE_ERROR_CODES = {
+  ROOM_NOT_FOUND: ROOM_NOT_FOUND_ERROR_CODE,
+  PLAYER_NOT_FOUND: 'PLAYER_NOT_FOUND',
+} as const
+export const isUpdateScoreErrorCode = (errorCode: string): errorCode is keyof typeof UPDATE_SCORE_ERROR_CODES =>
+  errorCode in UPDATE_SCORE_ERROR_CODES
+
+const updateScore = async ({
+  roomId,
+  playerId,
+  category,
+  score,
+}: {
+  roomId: string
+  playerId: string
+  category: ScoreCategory
+  score: number
+}) => {
+  const roomRef = getGameRoomDocumentReference(roomId)
+  const roomDoc = await getDoc(roomRef)
+
+  if (!roomDoc.exists()) {
+    throw new FirebaseCustomError(UPDATE_SCORE_ERROR_CODES.ROOM_NOT_FOUND)
+  }
+
+  const room = roomDoc.data()
+  const playerIndex = room.players.findIndex(p => p.id === playerId)
+
+  if (playerIndex === -1) {
+    throw new FirebaseCustomError(UPDATE_SCORE_ERROR_CODES.PLAYER_NOT_FOUND)
+  }
+
+  const updatedPlayers = [...room.players]
+  updatedPlayers[playerIndex].scores[category] = score
+
+  await updateDoc(roomRef, {
+    players: updatedPlayers,
+    updatedAt: Date.now(),
+  })
+}
+
 export const gameActions = {
   startGame,
   submitScore,
+  updateScore,
   restartGame,
 }
