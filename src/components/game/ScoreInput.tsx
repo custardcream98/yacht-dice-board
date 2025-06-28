@@ -260,9 +260,18 @@ const UpperSectionDialog = ({
   isScored: boolean
 }>) => {
   const [isOpen, setIsOpen] = useState(false)
+  const [isScoredSnapshot, setIsScoredSnapshot] = useState(isScored)
+
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      // 모달이 열릴 때 현재 isScored 상태를 스냅샷으로 저장
+      setIsScoredSnapshot(isScored)
+    }
+    setIsOpen(open)
+  }
 
   return (
-    <Dialog onOpenChange={setIsOpen} open={isOpen}>
+    <Dialog onOpenChange={handleOpenChange} open={isOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-h-[90vh] w-[95vw] max-w-md overflow-y-auto">
         <DialogHeader>
@@ -274,7 +283,7 @@ const UpperSectionDialog = ({
         <UpperSectionInput
           category={category}
           currentScore={currentScore}
-          isScored={isScored}
+          isScored={isScoredSnapshot}
           onScoreSubmit={score => {
             onScoreSubmit(category, score)
             setIsOpen(false)
@@ -442,9 +451,18 @@ const LowerSectionDialog = ({
   isScored: boolean
 }>) => {
   const [isOpen, setIsOpen] = useState(false)
+  const [isScoredSnapshot, setIsScoredSnapshot] = useState(isScored)
+
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      // 모달이 열릴 때 현재 isScored 상태를 스냅샷으로 저장
+      setIsScoredSnapshot(isScored)
+    }
+    setIsOpen(open)
+  }
 
   return (
-    <Dialog key={category} onOpenChange={setIsOpen} open={isOpen}>
+    <Dialog key={category} onOpenChange={handleOpenChange} open={isOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-h-[90vh] w-[95vw] max-w-md overflow-y-auto">
         <DialogHeader>
@@ -477,7 +495,7 @@ const LowerSectionDialog = ({
                     {...THREE_OF_A_KIND_INFO}
                     calculateScore={YachtDiceCalculator.calculateThreeOfAKind}
                     currentScore={currentScore}
-                    isScored={isScored}
+                    isScored={isScoredSnapshot}
                     onScoreSubmit={handleSubmit}
                   />
                 )
@@ -487,7 +505,7 @@ const LowerSectionDialog = ({
                     {...FOUR_OF_A_KIND_INFO}
                     calculateScore={YachtDiceCalculator.calculateFourOfAKind}
                     currentScore={currentScore}
-                    isScored={isScored}
+                    isScored={isScoredSnapshot}
                     onScoreSubmit={handleSubmit}
                   />
                 )
@@ -497,7 +515,7 @@ const LowerSectionDialog = ({
                     <YesNoInput
                       {...FULL_HOUSE_INFO}
                       currentScore={currentScore}
-                      isScored={isScored}
+                      isScored={isScoredSnapshot}
                       onScoreSubmit={handleSubmit}
                     />
                   )
@@ -507,7 +525,7 @@ const LowerSectionDialog = ({
                       calculateScore={YachtDiceCalculator.calculateFullHouse}
                       currentScore={currentScore}
                       description={FULL_HOUSE_INFO.description}
-                      isScored={isScored}
+                      isScored={isScoredSnapshot}
                       onScoreSubmit={handleSubmit}
                     />
                   )
@@ -518,7 +536,7 @@ const LowerSectionDialog = ({
                   <YesNoInput
                     {...SMALL_STRAIGHT_INFO}
                     currentScore={currentScore}
-                    isScored={isScored}
+                    isScored={isScoredSnapshot}
                     onScoreSubmit={handleSubmit}
                   />
                 )
@@ -527,19 +545,25 @@ const LowerSectionDialog = ({
                   <YesNoInput
                     {...LARGE_STRAIGHT_INFO}
                     currentScore={currentScore}
-                    isScored={isScored}
+                    isScored={isScoredSnapshot}
                     onScoreSubmit={handleSubmit}
                   />
                 )
               case 'yacht':
-                return <YachtYesNoInput currentScore={currentScore} isScored={isScored} onScoreSubmit={handleSubmit} />
+                return (
+                  <YachtYesNoInput
+                    currentScore={currentScore}
+                    isScored={isScoredSnapshot}
+                    onScoreSubmit={handleSubmit}
+                  />
+                )
               case 'chance':
                 return (
                   <DiceInput
                     {...CHANCE_INFO}
                     calculateScore={YachtDiceCalculator.calculateChance}
                     currentScore={currentScore}
-                    isScored={isScored}
+                    isScored={isScoredSnapshot}
                     onScoreSubmit={handleSubmit}
                   />
                 )
